@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Crucible — Open-source AI agent security framework. Stress-test AI agents against prompt injection, goal hijacking, and tool misuse before production.">
 <title>Crucible — Agent Security</title>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg: #02040a;
@@ -18,13 +20,17 @@
   --tx: #f8fafc;
   --tx2: #94a3b8;
   --tx3: #475569;
-  --bdr: rgba(255, 255, 255, 0.04);
-  --bdr-hover: rgba(255, 255, 255, 0.1);
+  --bdr: rgba(255, 255, 255, 0.06);
+  --bdr2: rgba(255, 85, 0, 0.25);
+  --bdr-hover: rgba(255, 255, 255, 0.12);
   --glass: rgba(10, 14, 26, 0.7);
+  --si: #94a3b8;
+  --si2: #ff5500;
   --fd: 'Big Shoulders Display', sans-serif;
   --fh: 'Outfit', sans-serif;
   --fm: 'JetBrains Mono', monospace;
-  --shd: 0 20px 40px -15px rgba(0,0,0,0.5);
+  --shd: 0 20px 60px -15px rgba(0,0,0,0.6);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -35,16 +41,22 @@ body{
   overflow-x: hidden;
   cursor: none;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── GRAIN ── */
+/* ── GRAIN OVERLAY ── */
 body::after{
   content:'';position:fixed;inset:0;z-index:9997;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  background-size:200px 200px;opacity:.35;mix-blend-mode:overlay;
+  background-size:200px 200px;opacity:.3;mix-blend-mode:overlay;
 }
 
-/* ── UTILS ── */
+/* ── SMOOTH-SCROLL WRAPPER ── */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto}
+.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+
+/* ── GLASS & GLOW UTILS ── */
 .glass{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--bdr)}
 .glow-track{position:relative;overflow:hidden}
 .glow-track::before{
@@ -55,39 +67,40 @@ body::after{
 .glow-track:hover::before{opacity:1}
 
 /* ── CURSOR ── */
-#cur{position:fixed;width:8px;height:8px;background:var(--or);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width.2s,height.2s,background.2s;mix-blend-mode:screen}
+#cur{position:fixed;width:8px;height:8px;background:var(--or);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width.2s,height.2s,background.2s,opacity.2s;mix-blend-mode:screen}
 #cur-r{position:fixed;width:40px;height:40px;border:1px solid rgba(255,85,0,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width.25s,height.25s,border-color.25s}
 body:not(:hover) #cur,body:not(:hover) #cur-r{opacity:0}
 
 /* ── PRELOADER ── */
 #loader{
-  position:fixed;inset:0;z-index:9990;background:var(--bg);
+  position:fixed;inset:0;z-index:10000;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+  pointer-events:none;
 }
-#loader-num{font-family:var(--fd);font-size:clamp(100px,20vw,280px);letter-spacing:-6px;color:var(--tx);line-height:.8}
-#loader-bar-wrap{width:320px;height:1px;background:var(--bdr)}
-#loader-bar{height:100%;background:var(--or);width:0%;box-shadow:0 0 15px var(--or)}
+#loader-num{
+  font-family:var(--fd);font-size:clamp(100px,20vw,280px);
+  letter-spacing:-6px;color:var(--tx);line-height:.8;
+  background:linear-gradient(135deg, var(--tx), var(--or));
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+#loader-bar-wrap{width:320px;height:1px;background:var(--bdr);overflow:hidden;border-radius:1px}
+#loader-bar{height:100%;background:var(--or);width:0%;box-shadow:0 0 20px var(--or),0 0 40px rgba(255,85,0,.3);transition:width.1s}
 #loader-label{font-size:10px;letter-spacing:6px;text-transform:uppercase;color:var(--tx3);font-family:var(--fh)}
 
-/* MOBILE OVERRIDES */
-@media (max-width: 768px) {
-  #loader { display: none !important; visibility: hidden !important; }
-  #hero { padding-top: 80px; height: auto; min-height: 100vh; justify-content: flex-start; }
-  .h-title { font-size: clamp(48px, 15vw, 76px) !important; margin-top: 40px; line-height: 1 !important}
-  .h-scroll, .cin-num { display: none !important; }
-  #cv { pointer-events: none !important; }
-}
+/* ── CANVAS ── */
+#cv{position:fixed;inset:0;z-index:-1;pointer-events:none;width:100vw;height:100vh}
 
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:1000;
   padding:0 64px;height:88px;
   display:flex;align-items:center;justify-content:space-between;
-  transition:all.4s cubic-bezier(0.16,1,0.3,1);
+  transition:all.4s var(--ease);
 }
-nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);border-bottom:1px solid var(--bdr)}
+nav.solid{height:72px;background:rgba(2,4,10,.85);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-bottom:1px solid var(--bdr)}
 .nlogo{display:flex;align-items:center;gap:12px;text-decoration:none}
-.nlogo-ico{width:32px;height:32px;transition:transform.4s}
+.nlogo-ico{width:36px;height:36px;transition:transform.4s var(--ease)}
 .nlogo:hover .nlogo-ico{transform:rotate(45deg) scale(1.1)}
 .nlogo-t{font-family:var(--fd);font-size:24px;letter-spacing:5px;color:var(--tx)}
 .nlogo-s{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--or);display:block;margin-top:-3px}
@@ -100,7 +113,7 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 }
 .nlinks a:not(.ncta)::after{
   content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;
-  background:var(--or);transition:width.3s cubic-bezier(0.16,1,0.3,1);
+  background:var(--or);transition:width.3s var(--ease);
 }
 .nlinks a:hover{color:var(--tx)}
 .nlinks a:hover::after{width:100%}
@@ -110,11 +123,24 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   font-weight:700!important;font-size:11px!important;
   box-shadow:0 0 20px var(--or-fade);transition:all.3s!important;
 }
-.ncta:hover{box-shadow:0 0 30px var(--or-glow);transform:translateY(-1px)}
+.ncta:hover{box-shadow:0 0 30px var(--or-glow),0 4px 16px rgba(255,85,0,.3);transform:translateY(-1px)}
 
+/* ── MOBILE NAV ── */
+.nmenu{display:none;background:none;border:none;cursor:none;padding:8px}
+.nmenu svg{stroke:var(--tx);width:24px;height:24px}
 @media (max-width: 900px) {
   nav{padding:0 24px;height:72px}
-  .nlinks{display:none} /* Simple mobile fix: hide links for now or could stack */
+  .nlinks{
+    display:none;position:fixed;top:72px;left:0;right:0;
+    flex-direction:column;gap:0;
+    background:rgba(2,4,10,.95);backdrop-filter:blur(32px);
+    border-bottom:1px solid var(--bdr);padding:16px 0;
+  }
+  .nlinks.open{display:flex}
+  .nlinks a{padding:16px 32px;width:100%;border-bottom:1px solid var(--bdr)}
+  .nlinks a::after{display:none!important}
+  .ncta{margin:16px 32px!important;width:auto!important;text-align:center}
+  .nmenu{display:block}
   .nlogo-t{font-size:18px;letter-spacing:3px}
 }
 
@@ -130,29 +156,31 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   color:var(--or);font-family:var(--fh);font-weight:600;
   border:1px solid var(--or-fade);padding:8px 20px;border-radius:100px;
   background:rgba(255,85,0,.04);margin-bottom:40px;
-  transform:translateY(20px);backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
 }
+.h-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--or);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,85,0,.4)}50%{opacity:.7;box-shadow:0 0 0 8px rgba(255,85,0,0)}}
 .h-title{
   font-family:var(--fd);
   font-size:clamp(80px,15vw,220px);
   line-height:.85;letter-spacing:-2px;
   color:var(--tx);perspective:1000px;
-  transform:translateY(30px);
 }
-.h-title .hl{color:var(--or)}
+.h-title .hl{color:var(--or);text-shadow:0 0 40px rgba(255,85,0,.3)}
 .h-title .ol{
-  -webkit-text-stroke:1.5px rgba(240,244,248,.2);
+  -webkit-text-stroke:1.5px rgba(240,244,248,.15);
   color:transparent;
+  transition:all.3s;
 }
+.h-title .ol:hover{-webkit-text-stroke-color:rgba(255,85,0,.4)}
 .h-sub{
   font-size:clamp(14px,1.5vw,17px);color:var(--tx2);
   max-width:520px;line-height:1.85;margin-top:28px;
-  font-weight:400;transform:translateY(16px);
+  font-weight:400;
 }
-.h-sub b{color:var(--si2);font-weight:500}
+.h-sub b{color:var(--or);font-weight:600}
 .h-acts{
   display:flex;align-items:center;gap:14px;margin-top:44px;
-  transform:translateY(16px);
 }
 .btn-mag{
   position:relative;overflow:hidden;
@@ -161,10 +189,10 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   font-family:var(--fh);font-weight:700;font-size:13px;
   letter-spacing:.5px;text-decoration:none;
   display:inline-flex;align-items:center;gap:8px;
-  transition:box-shadow.3s;
+  transition:box-shadow.3s,transform.2s;
   border:none;cursor:none;
 }
-.btn-mag:hover{box-shadow:0 0 40px rgba(255,85,0,.5),0 8px 24px rgba(255,85,0,.3)}
+.btn-mag:hover{box-shadow:0 0 50px rgba(255,85,0,.5),0 8px 32px rgba(255,85,0,.3);transform:translateY(-2px)}
 .btn-mag::before{
   content:'';position:absolute;inset:0;
   background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.25),transparent 60%);
@@ -172,14 +200,14 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 }
 .btn-mag:hover::before{opacity:1}
 .btn-out{
-  border:1px solid var(--bdr2);color:var(--tx2);
+  border:1px solid var(--bdr);color:var(--tx2);
   padding:14px 34px;border-radius:3px;
   font-family:var(--fh);font-weight:500;font-size:13px;
   text-decoration:none;display:inline-flex;align-items:center;gap:8px;
   transition:all.25s;cursor:none;
   background:rgba(255,255,255,.02);
 }
-.btn-out:hover{border-color:var(--si);color:var(--tx);background:rgba(255,255,255,.05)}
+.btn-out:hover{border-color:var(--or-fade);color:var(--tx);background:rgba(255,255,255,.05)}
 .h-scroll{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:10px;
@@ -194,7 +222,7 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 .ticker-wrap{
   position:relative;z-index:2;overflow:hidden;
   border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);
-  background:var(--s1);padding:12px 0;
+  background:var(--s1);padding:14px 0;
 }
 .ticker-inner{display:flex;width:max-content;animation:tck 30s linear infinite}
 .t-item{
@@ -202,7 +230,7 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   font-size:10px;letter-spacing:3px;text-transform:uppercase;
   color:var(--tx3);font-family:var(--fh);font-weight:500;white-space:nowrap;
 }
-.t-dot{width:3px;height:3px;background:var(--or);border-radius:50%;opacity:.7}
+.t-dot{width:4px;height:4px;background:var(--or);border-radius:50%;opacity:.7;box-shadow:0 0 6px rgba(255,85,0,.3)}
 @keyframes tck{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* ── SECTION BASE ── */
@@ -220,11 +248,11 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   letter-spacing:1px;line-height:.95;
   color:var(--tx);
 }
-.s-h .dim{-webkit-text-stroke:1px rgba(240,244,248,.18);color:transparent}
-.s-h .ac{color:var(--or)}
+.s-h .dim{-webkit-text-stroke:1px rgba(240,244,248,.15);color:transparent}
+.s-h .ac{color:var(--or);text-shadow:0 0 30px rgba(255,85,0,.15)}
 .s-p{font-size:15px;color:var(--tx2);line-height:1.9;font-weight:300;max-width:500px}
 
-/* ── CINEMATIC SCROLL SECTION ── */
+/* ── CINEMATIC SCROLL ── */
 #cin{height:240vh;position:relative}
 #cin-sticky{
   position:sticky;top:0;height:100vh;
@@ -236,19 +264,13 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   position:relative;z-index:3;
 }
 .cin-panel{
-  position:absolute;opacity:1;visibility:visible;
-  max-width:560px;
+  position:absolute;opacity:0;visibility:hidden;
+  max-width:560px;pointer-events:none;
 }
+.cin-panel.active{pointer-events:auto}
 .cin-panel .s-tag{margin-bottom:20px}
 .cin-panel .s-h{font-size:clamp(36px,4vw,64px);margin-bottom:16px}
 .cin-panel .s-p{margin-bottom:24px}
-
-@media (max-width: 768px) {
-  #cin-sticky{flex-direction:column;justify-content:center}
-  .cin-panels{width:100%;padding:0 32px;text-align:center}
-  .cin-panel{max-width:100%}
-  .cin-num{font-size:100px;right:32px;bottom:32px}
-}
 .cin-num{
   position:absolute;right:80px;bottom:60px;
   font-family:var(--fd);font-size:180px;
@@ -261,34 +283,34 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 .mods-grid{
   display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
   gap:1px;background:var(--bdr);
-  border:1px solid var(--bdr);border-radius:8px;overflow:hidden;
+  border:1px solid var(--bdr);border-radius:10px;overflow:hidden;
   margin-top:60px;
 }
 .mc{
-  background:var(--bg);padding:32px 28px;
+  background:var(--bg);padding:36px 30px;
   position:relative;overflow:hidden;
-  transition:background.3s;cursor:default;
+  transition:background.4s,transform.3s;cursor:default;
 }
 .mc::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--or),transparent);
-  transform:scaleX(0);transform-origin:left;transition:transform.5s;
+  transform:scaleX(0);transform-origin:left;transition:transform.5s var(--ease);
 }
 .mc:hover{background:var(--s2)}
 .mc:hover::after{transform:scaleX(1)}
-.mc:hover .mc-icon{border-color:rgba(255,85,0,.4);background:rgba(255,85,0,.08);box-shadow:0 0 20px rgba(255,85,0,.15)}
+.mc:hover .mc-icon{border-color:rgba(255,85,0,.5);background:rgba(255,85,0,.12);box-shadow:0 0 24px rgba(255,85,0,.15)}
 .mc-n{font-size:9px;letter-spacing:2.5px;color:var(--tx3);font-family:var(--fh);margin-bottom:18px}
 .mc-icon{
-  width:42px;height:42px;border:1px solid var(--bdr2);
-  border-radius:8px;display:flex;align-items:center;justify-content:center;
-  margin-bottom:18px;background:var(--s1);transition:all.3s;
+  width:48px;height:48px;border:1px solid var(--bdr2);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;background:rgba(255,85,0,0.07);transition:all.4s var(--ease);
 }
-.mc-icon svg{width:18px;height:18px;stroke:var(--si2)}
-.mc-t{font-family:var(--fh);font-size:14px;font-weight:600;color:var(--tx);margin-bottom:8px}
+.mc-icon svg{width:22px;height:22px;stroke:var(--or);stroke-width:1.5}
+.mc-t{font-family:var(--fh);font-size:15px;font-weight:600;color:var(--tx);margin-bottom:8px}
 .mc-d{font-size:12.5px;color:var(--tx2);line-height:1.75;font-weight:300}
 .mc-b{
   display:inline-block;margin-top:16px;font-size:9px;
-  letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:2px;
+  letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border-radius:3px;
   font-family:var(--fh);font-weight:600;
 }
 .bl{background:rgba(255,85,0,.12);color:var(--or)}
@@ -298,11 +320,11 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 #how{padding:120px 0}
 .how-grid{
   display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
-  gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-top:60px;
+  gap:1px;background:var(--bdr);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-top:60px;
 }
 .hw{
   background:var(--s1);padding:48px 36px;position:relative;overflow:hidden;
-  transition:background.3s,transform.3s;
+  transition:background.4s,transform.3s;
 }
 .hw:hover{background:var(--s2);transform:translateY(-2px)}
 .hw-ghost{
@@ -314,8 +336,8 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 .hw-t{font-family:var(--fh);font-size:21px;font-weight:700;color:var(--tx);margin-bottom:12px;line-height:1.3}
 .hw-d{font-size:13px;color:var(--tx2);line-height:1.8;font-weight:300;margin-bottom:20px}
 .hw-code{
-  background:var(--bg);border:1px solid var(--bdr);border-radius:5px;
-  padding:14px 16px;font-family:var(--fm);font-size:11.5px;line-height:1.8;
+  background:var(--bg);border:1px solid var(--bdr);border-radius:6px;
+  padding:16px 18px;font-family:var(--fm);font-size:11.5px;line-height:1.8;
 }
 .c-p{color:var(--tx3)}.c-w{color:var(--tx)}.c-g{color:#4ade80}.c-o{color:var(--or)}.c-b{color:var(--bl)}
 
@@ -323,11 +345,11 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 #oss{padding:120px 0;background:var(--s1);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
 .oss-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
 .oss-r{
-  background:var(--bg);border:1px solid var(--bdr);border-radius:10px;
+  background:var(--bg);border:1px solid var(--bdr);border-radius:12px;
   padding:28px;font-family:var(--fm);position:relative;
 }
 .oss-r::before{
-  content:'';position:absolute;inset:0;border-radius:10px;
+  content:'';position:absolute;inset:0;border-radius:12px;
   background:radial-gradient(circle at 50% 0,rgba(255,85,0,.06),transparent 60%);
   pointer-events:none;
 }
@@ -343,22 +365,23 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 #team{padding:120px 0}
 .tm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:60px}
 .tm{
-  background:var(--s1);border:1px solid var(--bdr);border-radius:10px;
+  background:var(--s1);border:1px solid var(--bdr);border-radius:12px;
   padding:30px;position:relative;overflow:hidden;
-  transition:all.3s;
+  transition:all.4s var(--ease);
 }
 .tm::before{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:1.5px;
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--or),transparent);
-  transform:scaleX(0);transform-origin:left;transition:transform.5s;
+  transform:scaleX(0);transform-origin:left;transition:transform.5s var(--ease);
 }
-.tm:hover{border-color:var(--bdr2);transform:translateY(-3px);background:var(--s2)}
+.tm:hover{border-color:var(--bdr2);transform:translateY(-4px);background:var(--s2);box-shadow:0 16px 48px -12px rgba(255,85,0,.08)}
 .tm:hover::before{transform:scaleX(1)}
 .tm-role{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--or);font-family:var(--fh);font-weight:600;margin-bottom:10px}
 .tm-t{font-family:var(--fh);font-size:16px;font-weight:700;color:var(--tx);margin-bottom:8px}
 .tm-d{font-size:12.5px;color:var(--tx2);line-height:1.75;font-weight:300}
 .tm-sk{display:flex;flex-wrap:wrap;gap:5px;margin-top:16px}
-.sk{font-size:9px;padding:3px 9px;border:1px solid var(--bdr2);border-radius:2px;color:var(--tx3);font-family:var(--fh);letter-spacing:.5px}
+.sk{font-size:9px;padding:4px 10px;border:1px solid var(--bdr);border-radius:3px;color:var(--tx3);font-family:var(--fh);letter-spacing:.5px;transition:border-color.3s}
+.tm:hover .sk{border-color:var(--bdr2)}
 
 /* ── MANIFESTO ── */
 #mani{padding:140px 0;text-align:center}
@@ -368,8 +391,8 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
   letter-spacing:1px;line-height:1.1;
   max-width:1100px;margin:0 auto;color:var(--tx);
 }
-.mani-q .em{color:var(--or)}
-.mani-q .dm{-webkit-text-stroke:1px rgba(240,244,248,.18);color:transparent}
+.mani-q .em{color:var(--or);text-shadow:0 0 30px rgba(255,85,0,.2)}
+.mani-q .dm{-webkit-text-stroke:1px rgba(240,244,248,.15);color:transparent}
 .mani-by{margin-top:24px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--tx3);font-family:var(--fh)}
 
 /* ── CTA ── */
@@ -377,16 +400,17 @@ nav.solid{height:72px;background:rgba(2,4,10,.8);backdrop-filter:blur(32px);bord
 #cta::before{
   content:'';position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  width:600px;height:600px;
-  background:radial-gradient(circle,rgba(255,85,0,.07),transparent 65%);
-  pointer-events:none;
+  width:700px;height:700px;
+  background:radial-gradient(circle,rgba(255,85,0,.08),transparent 65%);
+  pointer-events:none;animation:cta-pulse 4s ease-in-out infinite;
 }
+@keyframes cta-pulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}}
 .cta-c{max-width:760px;margin:0 auto;text-align:center;padding:0 48px}
 .cta-h{
   font-family:var(--fd);font-size:clamp(48px,8vw,110px);
   letter-spacing:1px;line-height:.95;color:var(--tx);margin-bottom:20px;
 }
-.cta-h .ac{color:var(--or)}
+.cta-h .ac{color:var(--or);text-shadow:0 0 40px rgba(255,85,0,.2)}
 .cta-p{font-size:15px;color:var(--tx2);line-height:1.9;font-weight:300;margin-bottom:44px}
 
 /* ── FOOTER ── */
@@ -398,61 +422,51 @@ footer{
 .fl{font-family:var(--fd);font-size:16px;letter-spacing:4px;color:var(--tx3)}
 .flinks{display:flex;gap:28px;list-style:none}
 .flinks a{font-size:11px;color:var(--tx3);text-decoration:none;letter-spacing:.5px;font-family:var(--fh);transition:color.2s}
-.flinks a:hover{color:var(--tx2)}
+.flinks a:hover{color:var(--or)}
 .fr{font-size:11px;color:var(--tx3);font-family:var(--fh)}
-
-@media (max-width: 900px) {
-  nav{padding:0 24px;height:72px}
-  .nlinks{display:none}
-  .nlogo-t{font-size:20px;letter-spacing:1px}
-  .h-title{font-size:clamp(54px, 12vw, 84px); line-height: 1; margin-top: 20px}
-  .h-sub{margin-top:20px; font-size:14px; max-width: 100%}
-  .h-acts{flex-direction:column; width:100%; gap:12px}
-  .btn-mag, .btn-out{width:100%; justify-content:center; padding: 18px 20px}
-  .cin-panels{width:100%; padding:0 32px; text-align:center; position: relative; height: 300px}
-  .cin-panel{max-width:100%; position: absolute; inset: 0}
-  #cin-sticky{flex-direction:column; justify-content: center}
-  .stats{grid-template-columns:1fr 1fr}
-  .tm-grid, .how-grid, .mods-grid{grid-template-columns:1fr}
-  .h-scroll, .cin-num { display: none !important }
-}
-
-#loader { z-index: 10000 !important; pointer-events: none; } 
-#cv { z-index: -1 !important; pointer-events: none }
-.cin-panel { pointer-events: none; visibility: hidden; opacity: 0; position: absolute; inset: 0 } 
-.cin-panel.active { pointer-events: auto; }
-
-/* ── REVEAL ── */
-/* ── REVEAL ── */
-.rv{opacity:1;transform:translateY(0)}
-.rv.vis{opacity:1;transform:translateY(0)}
-
-/* ── CHAR SPLIT ── */
-/* ── CHAR SPLIT ── */
-.char{display:inline-block;opacity:1;transform:translateY(0);transform-origin:bottom}
 
 /* ── SCROLL LINE ── */
 .scroll-line{
   position:absolute;left:50%;transform:translateX(-50%);
   width:1px;top:0;height:100%;pointer-events:none;z-index:0;
-  background:linear-gradient(to bottom,transparent,rgba(255,85,0,.15),transparent);
+  background:linear-gradient(to bottom,transparent,rgba(255,85,0,.12),transparent);
 }
 
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-top:80px}
-.st-i{
-  padding:32px 28px;border-right:1px solid var(--bdr);
-  transition:background.3s;
+/* ── REVEAL ── */
+.rv{opacity:1;transform:translateY(0)}
+.char{display:inline-block;opacity:1;transform:translateY(0);transform-origin:bottom}
+
+/* ── LIVE SIM ── */
+.sim-container{position:relative}
+.sim-scanline{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--or),transparent);
+  opacity:.3;animation:scanline 4s linear infinite;pointer-events:none;z-index:10;
 }
-.st-i:last-child{border-right:none}
-.st-i:hover{background:var(--s2)}
-.st-num{
-  font-family:var(--fd);font-size:56px;letter-spacing:-1px;line-height:1;
-  background:linear-gradient(135deg,var(--tx),var(--si));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+@keyframes scanline{0%{top:0}100%{top:100%}}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .inner{padding:0 24px}
+  .h-title{font-size:clamp(54px, 12vw, 84px)!important; line-height: 1!important; margin-top: 20px}
+  .h-sub{margin-top:20px; font-size:14px; max-width: 100%}
+  .h-acts{flex-direction:column; width:100%; gap:12px}
+  .btn-mag, .btn-out{width:100%; justify-content:center; padding: 18px 20px}
+  .tm-grid, .how-grid, .mods-grid{grid-template-columns:1fr}
+  .oss-grid{grid-template-columns:1fr;gap:40px}
+  footer{flex-direction:column;gap:20px;text-align:center}
+  .flinks{flex-wrap:wrap;justify-content:center}
 }
-.st-num .ora{-webkit-text-fill-color:var(--or);color:var(--or)}
-.st-lb{font-size:11px;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--fh);margin-top:4px}
+@media (max-width: 768px) {
+  #loader { display: none !important; visibility: hidden !important; }
+  #hero { padding-top: 80px; height: auto; min-height: 100vh; justify-content: flex-start; }
+  .h-title { font-size: clamp(48px, 15vw, 76px) !important; margin-top: 40px; line-height: 1 !important}
+  .h-scroll, .cin-num { display: none !important; }
+  #cv { pointer-events: none !important; }
+  .cin-panels{width:100%;padding:0 24px;text-align:center}
+  .cin-panel{max-width:100%}
+  #cin-sticky{flex-direction:column;justify-content:center}
+}
 </style>
 </head>
 <body>
@@ -485,7 +499,10 @@ footer{
       <span class="nlogo-s">Agent Security</span>
     </div>
   </a>
-  <ul class="nlinks">
+  <button class="nmenu" id="nmenu-btn" aria-label="Menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+  </button>
+  <ul class="nlinks" id="nlinks">
     <li><a href="#mods">Modules</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="#team">Team</a></li>
@@ -496,7 +513,7 @@ footer{
 
 <!-- HERO -->
 <section id="hero">
-  <div class="h-badge"><span></span>Open Source · Agent Security · OWASP Top 10</div>
+  <div class="h-badge"><span class="h-badge-dot"></span>Open Source · Agent Security · OWASP Top 10</div>
   <h1 class="h-title" id="htitle">
     BREAK<span class="hl">.</span><br>
     <span class="ol">BEFORE</span><br>
@@ -547,30 +564,6 @@ footer{
   </div>
 </div>
 
-<!-- STATS -->
-<section class="sec" style="padding:0 0 80px;background:var(--s1);border-top:1px solid var(--bdr)">
-  <div class="inner">
-    <div class="stats rv">
-      <div class="st-i">
-        <div class="st-num"><span class="cnt" data-t="10">0</span><span class="ora">+</span></div>
-        <div class="st-lb">Attack Modules</div>
-      </div>
-      <div class="st-i">
-        <div class="st-num"><span class="cnt" data-t="1000">0</span><span class="ora">+</span></div>
-        <div class="st-lb">Attack Vectors</div>
-      </div>
-      <div class="st-i">
-        <div class="st-num">OWASP <span class="ora">10</span></div>
-        <div class="st-lb">Fully Covered</div>
-      </div>
-      <div class="st-i">
-        <div class="st-num"><span class="ora">0</span>₹</div>
-        <div class="st-lb">Cost to Start</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- MODULES -->
 <section id="mods" class="sec">
   <div style="padding:120px 0;background:var(--bg)">
@@ -581,14 +574,14 @@ footer{
       <p class="s-p" style="margin-top:12px">Every attack surface an AI agent exposes — covered, tested, and scored before you ship.</p>
     </div>
     <div class="mods-grid rv">
-      <div class="mc"><div class="mc-n">01 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div class="mc-t">Reliability Testing</div><div class="mc-d">Runs your agent 10× on identical inputs. Scores variance and detects non-deterministic failure modes.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">02 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="mc-t">OWASP Top 10</div><div class="mc-d">Full coverage of all 10 OWASP Agentic AI risks. Goal hijacking, tool misuse, identity abuse, memory poisoning.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">03 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="mc-t">Hallucination Detection</div><div class="mc-d">Benchmarks responses against ground truth. Scores factual accuracy and identifies hallucination patterns.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">04 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div class="mc-t">Goal Completion</div><div class="mc-d">Did the agent actually finish the task? Evaluates outcomes, not just output format or response length.</div><span class="mc-b bc">v0.2</span></div>
-      <div class="mc"><div class="mc-n">05 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div><div class="mc-t">Tool Use Accuracy</div><div class="mc-d">Verifies agents call correct tools with valid parameters. Detects tool abuse and unauthorized API access.</div><span class="mc-b bc">v0.2</span></div>
-      <div class="mc"><div class="mc-n">06 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="mc-t">Multi-Agent Handoffs</div><div class="mc-d">Tests context integrity across agent-to-agent comms. Detects context poisoning in multi-step pipelines.</div><span class="mc-b bc">v0.3</span></div>
-      <div class="mc"><div class="mc-n">07 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="mc-t">Cost Efficiency</div><div class="mc-d">Token usage, latency, cost-per-task scoring. Production readiness report with optimization guidance.</div><span class="mc-b bc">v0.3</span></div>
-      <div class="mc"><div class="mc-n">08 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><div class="mc-t">CI/CD Integration</div><div class="mc-d">GitHub Actions plugin. Fails your build automatically if agent security score drops below threshold.</div><span class="mc-b bc">v0.4</span></div>
+      <div class="mc"><div class="mc-n">01 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div class="mc-t">Reliability Testing</div><div class="mc-d">Runs your agent 10× on identical inputs. Scores variance and detects non-deterministic failure modes.</div><span class="mc-b bl">Live v0.1</span></div>
+      <div class="mc"><div class="mc-n">02 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="mc-t">OWASP Top 10</div><div class="mc-d">Full coverage of all 10 OWASP Agentic AI risks. Goal hijacking, tool misuse, identity abuse, memory poisoning.</div><span class="mc-b bl">Live v0.1</span></div>
+      <div class="mc"><div class="mc-n">03 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="mc-t">Hallucination Detection</div><div class="mc-d">Benchmarks responses against ground truth. Scores factual accuracy and identifies hallucination patterns.</div><span class="mc-b bl">Live v0.1</span></div>
+      <div class="mc"><div class="mc-n">04 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div class="mc-t">Goal Completion</div><div class="mc-d">Did the agent actually finish the task? Evaluates outcomes, not just output format or response length.</div><span class="mc-b bc">v0.2</span></div>
+      <div class="mc"><div class="mc-n">05 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div><div class="mc-t">Tool Use Accuracy</div><div class="mc-d">Verifies agents call correct tools with valid parameters. Detects tool abuse and unauthorized API access.</div><span class="mc-b bc">v0.2</span></div>
+      <div class="mc"><div class="mc-n">06 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="mc-t">Multi-Agent Handoffs</div><div class="mc-d">Tests context integrity across agent-to-agent comms. Detects context poisoning in multi-step pipelines.</div><span class="mc-b bc">v0.3</span></div>
+      <div class="mc"><div class="mc-n">07 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="mc-t">Cost Efficiency</div><div class="mc-d">Token usage, latency, cost-per-task scoring. Production readiness report with optimization guidance.</div><span class="mc-b bc">v0.3</span></div>
+      <div class="mc"><div class="mc-n">08 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><div class="mc-t">CI/CD Integration</div><div class="mc-d">GitHub Actions plugin. Fails your build automatically if agent security score drops below threshold.</div><span class="mc-b bc">v0.4</span></div>
     </div>
   </div>
   </div>
@@ -597,21 +590,22 @@ footer{
 <!-- LIVE ATTACK SIMULATION -->
 <section id="live-sim" class="sec" style="padding:140px 0;background:var(--bg)">
   <div class="inner">
-    <div class="rv vis" style="display:flex;flex-direction:column;gap:16px;margin-bottom:60px">
+    <div class="rv" style="display:flex;flex-direction:column;gap:16px;margin-bottom:60px">
       <div class="s-tag">Live Simulation</div>
       <h2 class="s-h">The Crucible<br><span class="ac">In Action.</span></h2>
       <p class="s-p">Witness a real-time adversarial scan. 1,247 vectors deployed. Zero blind spots remaining.</p>
     </div>
     
-    <div class="sim-container rv vis glass" style="margin-top:40px;border-radius:12px;overflow:hidden;box-shadow:var(--shd)">
-      <div class="sim-header" style="background:rgba(255,255,255,0.03);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr)">
+    <div class="sim-container rv glass" style="margin-top:40px;border-radius:12px;overflow:hidden;box-shadow:var(--shd)">
+      <div class="sim-scanline"></div>
+      <div style="background:rgba(255,255,255,0.03);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bdr)">
         <div style="display:flex;gap:8px">
           <div style="width:10px;height:10px;border-radius:50%;background:#ff5f57"></div>
           <div style="width:10px;height:10px;border-radius:50%;background:#febc2e"></div>
           <div style="width:10px;height:10px;border-radius:50%;background:#28c840"></div>
         </div>
         <div style="font-family:var(--fm);font-size:10px;color:var(--tx3);letter-spacing:1px">CRUCIBLE_ENGINE_V1.0.4 - ACTIVE_SCAN</div>
-        <div style="font-family:var(--fm);font-size:10px;color:var(--or)">[ RECORDING ]</div>
+        <div style="font-family:var(--fm);font-size:10px;color:var(--or);animation:pulse-dot 1.5s ease-in-out infinite">● RECORDING</div>
       </div>
       
       <div class="sim-body" style="height:480px;background:var(--s1);padding:32px;font-family:var(--fm);font-size:13px;line-height:1.6;overflow-y:auto;position:relative">
@@ -624,12 +618,60 @@ footer{
         <div id="sim-status" style="position:absolute;bottom:32px;right:32px;text-align:right">
           <div style="font-size:48px;font-family:var(--fd);color:var(--tx);line-height:1">SCANNING...</div>
           <div id="sim-progress-text" style="font-size:14px;color:var(--or);margin-top:8px">PROGRESS: 0%</div>
-          <div style="width:240px;height:2px;background:var(--bdr);margin-top:12px;position:relative">
-            <div id="sim-progress-bar" style="position:absolute;top:0;left:0;height:100%;background:var(--or);width:0%;box-shadow:0 0 10px var(--or)"></div>
+          <div style="width:240px;height:2px;background:var(--bdr);margin-top:12px;position:relative;border-radius:2px;overflow:hidden">
+            <div id="sim-progress-bar" style="position:absolute;top:0;left:0;height:100%;background:var(--or);width:0%;box-shadow:0 0 12px var(--or);transition:width.1s"></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="sec">
+  <div style="padding:120px 0">
+  <div class="inner">
+    <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:60px" class="rv">
+      <div class="s-tag">Three Steps</div>
+      <h2 class="s-h">Install.<br><span class="dim">Configure.</span><br><span class="ac">Run.</span></h2>
+    </div>
+    <div class="how-grid rv">
+      <div class="hw">
+        <div class="hw-ghost">01</div>
+        <div class="hw-n">Step 01</div>
+        <div class="hw-t">Install in One Line</div>
+        <div class="hw-d">One pip install, zero dependencies hell. Works on Python 3.10+. No Docker, no cloud signup, no API keys to start.</div>
+        <div class="hw-code">
+          <div class="tl"><span class="c-p">$</span> <span class="c-w">pip install crucible-security</span></div>
+          <div class="tl"><span class="c-g">✓ Installed</span> <span class="c-p">crucible-security 0.1.0</span></div>
+        </div>
+      </div>
+      <div class="hw">
+        <div class="hw-ghost">02</div>
+        <div class="hw-n">Step 02</div>
+        <div class="hw-t">Point at Your Agent</div>
+        <div class="hw-d">Define your agent endpoint and attack scope. Choose modules, set thresholds, configure reporting — or use smart defaults.</div>
+        <div class="hw-code">
+          <div class="tl"><span class="c-p">#</span> <span class="c-p">crucible.yaml</span></div>
+          <div class="tl"><span class="c-b">target</span>: <span class="c-g">https://my-agent.io</span></div>
+          <div class="tl"><span class="c-b">modules</span>: <span class="c-w">[security, reliability]</span></div>
+          <div class="tl"><span class="c-b">threshold</span>: <span class="c-o">80</span></div>
+        </div>
+      </div>
+      <div class="hw">
+        <div class="hw-ghost">03</div>
+        <div class="hw-n">Step 03</div>
+        <div class="hw-t">Get Your Score</div>
+        <div class="hw-d">Crucible hammers your agent with 1,000+ adversarial scenarios. You get a detailed report with severity, reproduction steps, and fix suggestions.</div>
+        <div class="hw-code">
+          <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible scan</span></div>
+          <div class="tl"><span class="c-o">⠸</span> <span class="c-p">Running 1,247 attack vectors...</span></div>
+          <div class="tl"><span class="c-g">COMPLETE</span> — Score: <span class="c-o">74/100</span></div>
+          <div class="tl"><span class="c-p">3 critical · 7 medium · 12 low</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
   </div>
 </section>
 
@@ -702,11 +744,11 @@ footer{
     </div>
     <div class="tm-grid">
       <div class="tm rv"><div class="tm-role">Founder & Core</div><div class="tm-t">Khalid Saifullah Sayyed</div><div class="tm-d">AI & backend engineer. LLM security specialist. IIT Patna hackathon winner. Contributor to YC W20 10k★ repos. Building the future of AI agent security.</div><div class="tm-sk"><span class="sk">LLM Security</span><span class="sk">Multi-Agent</span><span class="sk">FastAPI</span><span class="sk">Red Teaming</span><span class="sk">Python</span></div></div>
-      <div class="tm rv" style="transition-delay:.1s"><div class="tm-role">Open Position</div><div class="tm-t">AI / LLM Engineer</div><div class="tm-d">Deep understanding of language model internals. Can build adversarial prompt systems that find vulnerabilities others miss. Transformer architecture knowledge essential.</div><div class="tm-sk"><span class="sk">Transformers</span><span class="sk">Adversarial ML</span><span class="sk">LangChain</span><span class="sk">Prompt Eng</span></div></div>
-      <div class="tm rv" style="transition-delay:.2s"><div class="tm-role">Open Position</div><div class="tm-t">Security Engineer</div><div class="tm-t"> traditional security background meets AI. Deep OWASP knowledge, penetration testing experience, now applying it to agentic systems.</div><div class="tm-sk"><span class="sk">Pentesting</span><span class="sk">OWASP</span><span class="sk">CVE Research</span><span class="sk">Threat Modeling</span></div></div>
-      <div class="tm rv" style="transition-delay:.1s"><div class="tm-role">Open Position</div><div class="tm-t">Backend / Infra</div><div class="tm-d">Builds systems running thousands of concurrent attack simulations. Async Python, job queues, cloud-native. Performance matters.</div><div class="tm-sk"><span class="sk">FastAPI</span><span class="sk">Redis</span><span class="sk">Docker</span><span class="sk">Celery</span><span class="sk">Go</span></div></div>
-      <div class="tm rv" style="transition-delay:.2s"><div class="tm-role">Open Position</div><div class="tm-t">Frontend / DX</div><div class="tm-d">Builds the dashboard, CLI UX, and docs. Believes developer experience is a product decision. Obsessed with making complex things feel simple.</div><div class="tm-sk"><span class="sk">React</span><span class="sk">TypeScript</span><span class="sk">CLI Design</span><span class="sk">Docs</span></div></div>
-      <div class="tm rv" style="transition-delay:.3s;border:1px dashed var(--bdr2);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:200px"><div style="font-size:28px;color:var(--tx3);margin-bottom:10px">+</div><div class="tm-t" style="color:var(--tx2)">Could Be You</div><div class="tm-d" style="margin-top:6px">Contribute to the repo. If your work stands out, we find you.</div><a href="https://github.com/crucible-security/crucible" class="btn-mag" style="margin-top:20px;font-size:11px;padding:10px 20px" id="mbtn3">Contribute Now</a></div>
+      <div class="tm rv"><div class="tm-role">Open Position</div><div class="tm-t">AI / LLM Engineer</div><div class="tm-d">Deep understanding of language model internals. Can build adversarial prompt systems that find vulnerabilities others miss. Transformer architecture knowledge essential.</div><div class="tm-sk"><span class="sk">Transformers</span><span class="sk">Adversarial ML</span><span class="sk">LangChain</span><span class="sk">Prompt Eng</span></div></div>
+      <div class="tm rv"><div class="tm-role">Open Position</div><div class="tm-t">Security Engineer</div><div class="tm-d">Traditional security background meets AI. Deep OWASP knowledge, penetration testing experience, now applying it to agentic systems.</div><div class="tm-sk"><span class="sk">Pentesting</span><span class="sk">OWASP</span><span class="sk">CVE Research</span><span class="sk">Threat Modeling</span></div></div>
+      <div class="tm rv"><div class="tm-role">Open Position</div><div class="tm-t">Backend / Infra</div><div class="tm-d">Builds systems running thousands of concurrent attack simulations. Async Python, job queues, cloud-native. Performance matters.</div><div class="tm-sk"><span class="sk">FastAPI</span><span class="sk">Redis</span><span class="sk">Docker</span><span class="sk">Celery</span><span class="sk">Go</span></div></div>
+      <div class="tm rv"><div class="tm-role">Open Position</div><div class="tm-t">Frontend / DX</div><div class="tm-d">Builds the dashboard, CLI UX, and docs. Believes developer experience is a product decision. Obsessed with making complex things feel simple.</div><div class="tm-sk"><span class="sk">React</span><span class="sk">TypeScript</span><span class="sk">CLI Design</span><span class="sk">Docs</span></div></div>
+      <div class="tm rv" style="border:1px dashed var(--bdr2);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:200px"><div style="font-size:28px;color:var(--tx3);margin-bottom:10px">+</div><div class="tm-t" style="color:var(--tx2)">Could Be You</div><div class="tm-d" style="margin-top:6px">Contribute to the repo. If your work stands out, we find you.</div><a href="https://github.com/crucible-security/crucible" class="btn-mag" style="margin-top:20px;font-size:11px;padding:10px 20px" id="mbtn3">Contribute Now</a></div>
     </div>
   </div>
   </div>
@@ -741,62 +783,93 @@ footer{
   <div class="fr">© 2026 Crucible Security · Open Source</div>
 </footer>
 
-<!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script>
-gsap.registerPlugin(ScrollTrigger);
+<!-- ═══════════════════════════════════════════ -->
+<!--  SCRIPTS — GSAP + LENIS                   -->
+<!-- ═══════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// ══════════════════════════════════════════
+//  LENIS — BUTTERY SMOOTH SCROLL
+// ══════════════════════════════════════════
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  orientation: 'vertical',
+  smoothWheel: true,
+});
+
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+gsap.ticker.lagSmoothing(0);
 
 // ══════════════════════════════════════════
 //  PRELOADER
 // ══════════════════════════════════════════
-(function(){
-  const num = document.getElementById('loader-num');
-  const bar = document.getElementById('loader-bar');
-  const ldr = document.getElementById('loader');
-  let v = 0;
-  const iv = setInterval(()=>{
-    v += Math.random() * 4 + 1;
-    if(v >= 100){ v = 100; clearInterval(iv); }
-    num.textContent = Math.floor(v);
-    bar.style.width = v + '%';
-    if(v >= 100){
-      setTimeout(()=>{
-        gsap.to(ldr, { 
-          opacity: 0, 
-          autoAlpha: 0, 
-          duration: 1, 
-          ease: 'expo.inOut',
-          onComplete: ()=>{ 
-            ldr.style.display='none'; 
-            initAnims(); 
-          }
-        });
-      }, 300);
-    }
-  }, 28);
-})();
+const loaderNum = document.getElementById('loader-num');
+const loaderBar = document.getElementById('loader-bar');
+const loader = document.getElementById('loader');
+let loadVal = 0;
+const loadIv = setInterval(() => {
+  loadVal += Math.random() * 4 + 1;
+  if(loadVal >= 100){ loadVal = 100; clearInterval(loadIv); }
+  loaderNum.textContent = Math.floor(loadVal);
+  loaderBar.style.width = loadVal + '%';
+  if(loadVal >= 100){
+    setTimeout(() => {
+      gsap.to(loader, { 
+        opacity: 0, 
+        autoAlpha: 0, 
+        duration: 1.2, 
+        ease: 'expo.inOut',
+        onComplete: () => { 
+          loader.style.display = 'none'; 
+          initAnims(); 
+        }
+      });
+    }, 400);
+  }
+}, 28);
 
 // ══════════════════════════════════════════
-//  THREE.JS — ULTIMATE SECURITY CORE
+//  THREE.JS — ELITE 3D WITH POST-PROCESSING
 // ══════════════════════════════════════════
 const cv = document.getElementById('cv');
-const rndr = new THREE.WebGLRenderer({ canvas:cv, antialias:true, alpha:true });
-rndr.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-rndr.setSize(window.innerWidth, window.innerHeight);
+const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
 
 const scene = new THREE.Scene();
-const cam = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-cam.position.z = 40;
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 40;
 
-// ── CUSTOM SHADER BACKGROUND (REACTIVE DEPTH) ─
+// ── POST-PROCESSING (BLOOM) ──
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.8,   // strength
+  0.4,   // radius
+  0.85   // threshold
+);
+composer.addPass(bloomPass);
+
+// ── CUSTOM SHADER BACKGROUND ──
 const vertShader = `
 varying vec2 vUv;
-varying vec3 vPos;
 void main(){
   vUv = uv;
-  vPos = position;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }`;
 
@@ -826,21 +899,20 @@ void main(){
   vec2 m = (uMouse - 0.5) * vec2(uRes.x/uRes.y, 1.0);
   
   float dist = length(st - m * 0.5);
-  float ripple = sin(dist * 10.0 - uT * 2.0) * 0.03 * exp(-dist * 2.0);
+  float ripple = sin(dist * 12.0 - uT * 2.5) * 0.03 * exp(-dist * 2.0);
   
   vec2 p = st + ripple;
-  float f = fbm(p * 2.0 + uT * 0.1 + uScroll * 0.5);
+  float f = fbm(p * 2.0 + uT * 0.08 + uScroll * 0.5);
   
-  vec3 c1 = vec3(0.02, 0.04, 0.1); // Deep Navy
-  vec3 c2 = vec3(1.0, 0.33, 0.0); // Flame Orange
-  vec3 c3 = vec3(0.0, 0.66, 1.0); // Cyber Blue
+  vec3 c1 = vec3(0.01, 0.025, 0.08);
+  vec3 c2 = vec3(1.0, 0.33, 0.0);
+  vec3 c3 = vec3(0.0, 0.66, 1.0);
   
   vec3 col = mix(c1, c2, f * f * 3.0);
   col = mix(col, c3, pow(f, 4.0) * 0.5);
   
-  // Vignette & Glow
-  float vig = smoothstep(0.8, 0.2, length(st));
-  float mGlow = exp(-dist * 4.0) * 0.25;
+  float vig = smoothstep(0.85, 0.15, length(st));
+  float mGlow = exp(-dist * 4.0) * 0.3;
   
   gl_FragColor = vec4((col + mGlow) * vig * 0.3, 1.0);
 }`;
@@ -861,154 +933,232 @@ const shaderPlane = new THREE.Mesh(
 shaderPlane.position.z = -50;
 scene.add(shaderPlane);
 
-// ── SECURITY CORE (LAYERED GEOMETRY) ────────
+// ── SECURITY CORE (LAYERED GEOMETRY) ──
 const coreGroup = new THREE.Group();
 
-// 1. Inner Pulse Sphere
-const innerGeo = new THREE.IcosahedronGeometry(6, 4);
-const innerMat = new THREE.MeshPhongMaterial({ 
+// 1. Inner Pulse — Icosahedron with bloom-friendly emissive
+const innerGeo = new THREE.IcosahedronGeometry(6, 5);
+const innerMat = new THREE.MeshStandardMaterial({ 
   color: 0xff5500, 
-  emissive: 0xff2200,
-  emissiveIntensity: 0.5,
+  emissive: 0xff3300,
+  emissiveIntensity: 0.6,
   transparent: true,
-  opacity: 0.15,
-  wireframe: true 
+  opacity: 0.12,
+  wireframe: true,
+  roughness: 0.3,
+  metalness: 0.8
 });
 const innerCore = new THREE.Mesh(innerGeo, innerMat);
 coreGroup.add(innerCore);
 
-// 2. Data Shield Rings
+// 2. Solid inner glow sphere
+const glowGeo = new THREE.SphereGeometry(3, 32, 32);
+const glowMat = new THREE.MeshStandardMaterial({
+  color: 0xff5500,
+  emissive: 0xff5500,
+  emissiveIntensity: 2.0,
+  transparent: true,
+  opacity: 0.08,
+  roughness: 1,
+  metalness: 0
+});
+const glowSphere = new THREE.Mesh(glowGeo, glowMat);
+coreGroup.add(glowSphere);
+
+// 3. Data Shield Rings
 const rings = [];
-for(let i=0; i<3; i++){
-  const rGeo = new THREE.TorusGeometry(10 + i*4, 0.04, 16, 100);
-  const rMat = new THREE.MeshBasicMaterial({ 
-    color: i===0 ? 0xff5500 : 0x00aaff, 
+for(let i=0; i<4; i++){
+  const rGeo = new THREE.TorusGeometry(9 + i*3.5, 0.035 + i*0.01, 20, 120);
+  const rMat = new THREE.MeshStandardMaterial({ 
+    color: i < 2 ? 0xff5500 : 0x00aaff, 
+    emissive: i < 2 ? 0xff5500 : 0x00aaff,
+    emissiveIntensity: 0.5,
     transparent: true, 
-    opacity: 0.2 
+    opacity: 0.25 - i*0.04,
+    roughness: 0.5,
+    metalness: 0.5,
   });
   const ring = new THREE.Mesh(rGeo, rMat);
   ring.rotation.x = Math.random() * Math.PI;
   ring.rotation.y = Math.random() * Math.PI;
-  rings.push({ mesh: ring, speed: 0.02 + Math.random()*0.02 });
+  rings.push({ mesh: ring, speed: 0.015 + Math.random()*0.015, axis: i % 2 === 0 ? 'x' : 'y' });
   coreGroup.add(ring);
 }
 
-// 3. Orbiting Data Nodes
+// 4. Orbiting Data Nodes
 const nodes = new THREE.Group();
-for(let i=0; i<40; i++){
-  const nGeo = new THREE.SphereGeometry(0.12, 8, 8);
-  const nMat = new THREE.MeshBasicMaterial({ color: i%5===0 ? 0xff5500 : 0xffffff, transparent:true, opacity:0.8 });
+for(let i=0; i<60; i++){
+  const size = 0.08 + Math.random() * 0.08;
+  const nGeo = new THREE.SphereGeometry(size, 8, 8);
+  const isOrange = i % 4 === 0;
+  const nMat = new THREE.MeshStandardMaterial({ 
+    color: isOrange ? 0xff5500 : 0xaabbcc, 
+    emissive: isOrange ? 0xff5500 : 0x3366ff,
+    emissiveIntensity: isOrange ? 1.5 : 0.3,
+    transparent: true, 
+    opacity: 0.9 
+  });
   const node = new THREE.Mesh(nGeo, nMat);
   const ang = Math.random() * Math.PI * 2;
-  const rad = 12 + Math.random() * 8;
-  node.position.set(Math.cos(ang)*rad, (Math.random()-0.5)*15, Math.sin(ang)*rad);
+  const rad = 11 + Math.random() * 10;
+  const yOff = (Math.random() - 0.5) * 18;
+  node.position.set(Math.cos(ang)*rad, yOff, Math.sin(ang)*rad);
   node.userData.phi = Math.random() * Math.PI * 2;
   node.userData.rad = rad;
+  node.userData.yBase = yOff;
+  node.userData.ySpeed = 0.5 + Math.random();
   nodes.add(node);
 }
 coreGroup.add(nodes);
 
-// 4. Particle Data Streams
-const pCount = 3000;
+// 5. Particle Data Streams (Depth-varied)
+const pCount = 4000;
 const pGeo = new THREE.BufferGeometry();
 const pPos = new Float32Array(pCount * 3);
 const pVel = new Float32Array(pCount);
+const pColors = new Float32Array(pCount * 3);
 for(let i=0; i<pCount; i++){
-  pPos[i*3] = (Math.random()-0.5)*100;
-  pPos[i*3+1] = (Math.random()-0.5)*100;
-  pPos[i*3+2] = (Math.random()-0.5)*100;
-  pVel[i] = 0.1 + Math.random()*0.2;
+  pPos[i*3] = (Math.random()-0.5)*120;
+  pPos[i*3+1] = (Math.random()-0.5)*120;
+  pPos[i*3+2] = (Math.random()-0.5)*120;
+  pVel[i] = 0.08 + Math.random()*0.15;
+  // Color variation: mix of orange and blue
+  const isOr = Math.random() > 0.7;
+  pColors[i*3] = isOr ? 1.0 : 0.3;
+  pColors[i*3+1] = isOr ? 0.33 : 0.5;
+  pColors[i*3+2] = isOr ? 0.0 : 1.0;
 }
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-const pMat = new THREE.PointsMaterial({ color:0x00aaff, size:0.08, transparent:true, opacity:0.3, blending: THREE.AdditiveBlending });
+pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
+const pMat = new THREE.PointsMaterial({ 
+  size: 0.06, 
+  transparent: true, 
+  opacity: 0.35, 
+  blending: THREE.AdditiveBlending,
+  vertexColors: true,
+  sizeAttenuation: true
+});
 const particles = new THREE.Points(pGeo, pMat);
 scene.add(particles);
 
-// Lighting
-const amb = new THREE.AmbientLight(0xffffff, 0.2);
-const pt = new THREE.PointLight(0xff5500, 2, 50);
-pt.position.set(10, 10, 10);
-scene.add(amb, pt);
+// 6. Connecting Lines (Data Streams)
+const lineGeo = new THREE.BufferGeometry();
+const linePos = new Float32Array(200 * 6); // 200 line segments
+for(let i=0; i<200; i++){
+  const ang1 = Math.random() * Math.PI * 2;
+  const r1 = 6 + Math.random() * 4;
+  const ang2 = ang1 + (Math.random() - 0.5) * 0.5;
+  const r2 = r1 + 4 + Math.random() * 8;
+  linePos[i*6] = Math.cos(ang1) * r1;
+  linePos[i*6+1] = (Math.random()-0.5) * 12;
+  linePos[i*6+2] = Math.sin(ang1) * r1;
+  linePos[i*6+3] = Math.cos(ang2) * r2;
+  linePos[i*6+4] = (Math.random()-0.5) * 12;
+  linePos[i*6+5] = Math.sin(ang2) * r2;
+}
+lineGeo.setAttribute('position', new THREE.BufferAttribute(linePos, 3));
+const lineMat = new THREE.LineBasicMaterial({ 
+  color: 0xff5500, 
+  transparent: true, 
+  opacity: 0.04,
+  blending: THREE.AdditiveBlending
+});
+const lines = new THREE.LineSegments(lineGeo, lineMat);
+coreGroup.add(lines);
 
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+const pt1 = new THREE.PointLight(0xff5500, 3, 60);
+pt1.position.set(10, 10, 10);
+const pt2 = new THREE.PointLight(0x0066ff, 1.5, 60);
+pt2.position.set(-10, -5, 15);
+scene.add(pt1, pt2);
 scene.add(coreGroup);
 
-// ── MOUSE & SCROLL ─────────────────────────
-let mx=0.5, my=0.5, scr=0;
-document.addEventListener('mousemove', e=>{
+// ── MOUSE & SCROLL ──
+let mx = 0.5, my = 0.5, scr = 0;
+document.addEventListener('mousemove', e => {
   mx = e.clientX / window.innerWidth;
   my = e.clientY / window.innerHeight;
   shaderPlane.material.uniforms.uMouse.value.set(mx, 1-my);
 });
-window.addEventListener('scroll', ()=>{ 
+window.addEventListener('scroll', () => { 
   scr = window.scrollY / (document.body.scrollHeight - window.innerHeight);
   shaderPlane.material.uniforms.uScroll.value = scr;
 });
 
-// ── ANIMATION LOOP ─────────────────────────
+// ── ANIMATION LOOP ──
 let t = 0;
 function animate(){
   requestAnimationFrame(animate);
-  t += 0.01;
+  t += 0.008;
   shaderPlane.material.uniforms.uT.value = t;
 
-  // Pulse effect
-  const pulse = 1 + Math.sin(t * 2.0) * 0.1;
+  // Pulse
+  const pulse = 1 + Math.sin(t * 1.5) * 0.08;
   innerCore.scale.set(pulse, pulse, pulse);
-  innerCore.rotation.y += 0.01;
-  innerCore.rotation.z += 0.005;
+  innerCore.rotation.y += 0.008;
+  innerCore.rotation.z += 0.004;
+  
+  // Glow sphere subtle pulse
+  const gPulse = 1 + Math.sin(t * 3) * 0.15;
+  glowSphere.scale.set(gPulse, gPulse, gPulse);
+  glowSphere.material.opacity = 0.06 + Math.sin(t * 2) * 0.03;
 
+  // Rings
   rings.forEach(r => {
-    r.mesh.rotation.x += r.speed;
-    r.mesh.rotation.y += r.speed * 0.5;
+    r.mesh.rotation[r.axis] += r.speed;
+    r.mesh.rotation.z += r.speed * 0.3;
   });
 
+  // Nodes
   nodes.children.forEach(n => {
-    n.userData.phi += 0.01;
+    n.userData.phi += 0.008;
     const r = n.userData.rad;
     n.position.x = Math.cos(n.userData.phi) * r;
     n.position.z = Math.sin(n.userData.phi) * r;
+    n.position.y = n.userData.yBase + Math.sin(t * n.userData.ySpeed) * 1.5;
   });
-
   nodes.rotation.y += 0.002;
-  coreGroup.rotation.y = t * 0.05 + mx * 0.2;
-  coreGroup.rotation.x = my * 0.2;
+  
+  // Lines rotate with core
+  lines.rotation.y += 0.001;
+  lines.rotation.x += 0.0005;
 
-  // Particle Stream Movement
+  // Core camera follow
+  coreGroup.rotation.y = t * 0.04 + mx * 0.3;
+  coreGroup.rotation.x = (my - 0.5) * 0.3;
+
+  // Particles
   const pArr = particles.geometry.attributes.position.array;
   for(let i=0; i<pCount; i++){
     pArr[i*3+1] -= pVel[i];
-    if(pArr[i*3+1] < -50) pArr[i*3+1] = 50;
+    if(pArr[i*3+1] < -60) pArr[i*3+1] = 60;
   }
   particles.geometry.attributes.position.needsUpdate = true;
+  particles.rotation.y += 0.0003;
 
   // Camera Parallax
-  cam.position.x += (mx * 10 - 5 - cam.position.x) * 0.05;
-  cam.position.y += (-(my * 10 - 5) - cam.position.y) * 0.05;
-  cam.lookAt(0, 0, 0);
+  camera.position.x += (mx * 12 - 6 - camera.position.x) * 0.04;
+  camera.position.y += (-(my * 12 - 6) - camera.position.y) * 0.04;
+  camera.lookAt(0, 0, 0);
 
-  rndr.render(scene, cam);
+  // Render with Bloom
+  composer.render();
 }
 animate();
 
-window.addEventListener('resize', ()=>{
-  cam.aspect = window.innerWidth / window.innerHeight;
-  cam.updateProjectionMatrix();
-  rndr.setSize(window.innerWidth, window.innerHeight);
-  shaderPlane.material.uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
-});
-
-window.addEventListener('resize', ()=>{
-  cam.aspect = window.innerWidth / window.innerHeight;
-  cam.updateProjectionMatrix();
-  rndr.setSize(window.innerWidth, window.innerHeight);
+// ── RESIZE ──
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
   shaderPlane.material.uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
 });
 
 // ══════════════════════════════════════════
-//  POST-LOAD ANIMATIONS
-// ══════════════════════════════════════════
-// ══════════════════════════════════════════
-//  ULTIMATE ANIMATIONS & GSAP
+//  GSAP ANIMATIONS
 // ══════════════════════════════════════════
 function splitText(el) {
   const text = el.textContent.split('');
@@ -1033,66 +1183,61 @@ function startSim() {
     { t: "PAYLOAD: [ GOAL_HIJACK_SIG_09 ]", c: "c-o" },
     { t: "BYPASSING Guardrails v2.1...", c: "c-b" },
     { t: "VULNERABILITY CONFIRMED: CROSS_AGENT_POISONING", c: "c-p" },
-    { t: "GENERATING REPRODUCTION STEPS...", c: "c-w" }
+    { t: "PAYLOAD: [ TOOL_MISUSE_VECTOR_22 ]", c: "c-o" },
+    { t: "UNAUTHORIZED_API_CALL: DELETE /users", c: "c-p" },
+    { t: "GENERATING REPRODUCTION STEPS...", c: "c-w" },
+    { t: "SCAN COMPLETE — 3 CRITICAL VULNERABILITIES FOUND", c: "c-g" }
   ];
   
-  let i = 0;
-  let p = 0;
+  let i = 0, p = 0;
   const iv = setInterval(() => {
     if (p < 100) {
-      p += Math.random() * 2;
+      p += Math.random() * 1.5 + 0.5;
       if (p > 100) p = 100;
       bar.style.width = p + '%';
       txt.textContent = `PROGRESS: ${Math.floor(p)}%`;
     }
     
-    if (Math.random() > 0.7 && i < payloads.length) {
+    if (Math.random() > 0.65 && i < payloads.length) {
       const l = document.createElement('div');
       l.className = 'tl';
+      l.style.opacity = '0';
       l.innerHTML = `<span class="c-p">[ ${new Date().toLocaleTimeString('en-GB')} ]</span> <span class="${payloads[i].c}">${payloads[i].t}</span>`;
       logs.appendChild(l);
+      gsap.to(l, { opacity: 1, duration: 0.3 });
       logs.parentElement.scrollTop = logs.parentElement.scrollHeight;
       i++;
     }
     
     if (p >= 100 && i >= payloads.length) clearInterval(iv);
-  }, 50); // Faster simulation
+  }, 60);
 }
 
 function initAnims(){
-  // Character Split All Headers
   document.querySelectorAll('.h-title, .s-h, .cta-h').forEach(splitText);
 
   // Nav Entry
-  gsap.from('#nav', { yPercent:-100, duration:1.2, ease:'expo.out' });
+  gsap.from('#nav', { yPercent: -100, duration: 1.2, ease: 'expo.out' });
 
   // Hero Entry Sequence
   const tl = gsap.timeline();
-  // Set initial hidden states for Hero
   gsap.set('.h-badge, .h-sub, .h-acts', { opacity: 0, y: 20 });
-  gsap.set('.h-title .char', { opacity: 0, y: 30, rotateX: -20 });
+  gsap.set('.h-title .char', { opacity: 0, y: 40, rotateX: -30 });
 
-  tl.to('.h-badge', { opacity:1, y:0, duration:1, ease:'power4.out', delay:0.2 })
+  tl.to('.h-badge', { opacity: 1, y: 0, duration: 1, ease: 'power4.out', delay: 0.3 })
     .to('.h-title .char', { 
-      opacity:1, 
-      y:0, 
-      rotateX:0,
-      stagger: 0.02, 
-      duration:0.8, 
-      ease:'back.out(1.7)' 
+      opacity: 1, y: 0, rotateX: 0,
+      stagger: 0.02, duration: 0.8, ease: 'back.out(1.7)' 
     }, "-=0.6")
-    .from('.h-sub', { opacity:0, y:16, duration:1, ease:'power3.out' }, "-=0.4")
-    .from('.h-acts', { opacity:0, y:16, duration:1, ease:'power3.out' }, "-=0.8");
+    .to('.h-sub', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, "-=0.4")
+    .to('.h-acts', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, "-=0.8");
 
   // Scroll Character Reveals
   document.querySelectorAll('.s-h').forEach(h => {
+    gsap.set(h.querySelectorAll('.char'), { opacity: 0, y: 30, rotateX: -20 });
     gsap.to(h.querySelectorAll('.char'), {
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      stagger: 0.015,
-      duration: 0.6,
-      ease: 'power2.out',
+      opacity: 1, y: 0, rotateX: 0,
+      stagger: 0.015, duration: 0.6, ease: 'power2.out',
       scrollTrigger: { trigger: h, start: 'top 85%' }
     });
   });
@@ -1102,36 +1247,36 @@ function initAnims(){
     trigger: '#live-sim',
     start: 'top 80%',
     once: true,
-    onEnter: () => {
-      console.log('Sim Triggered');
-      startSim();
-    }
+    onEnter: startSim
   });
 
   // Staggered Item Reveals
-  gsap.utils.toArray('.mc, .hw, .tm').forEach((el, i) => {
+  gsap.utils.toArray('.mc, .hw, .tm').forEach(el => {
     gsap.fromTo(el, 
-      { opacity: 0, y: 50, scale: 0.95 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1, 
-        duration: 0.8, 
-        ease: 'power3.out',
+      { opacity: 0, y: 50, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 90%' }
       }
     );
   });
+  
+  // Manifesto parallax
+  gsap.fromTo('.mani-q', 
+    { opacity: 0, scale: 0.95 },
+    { opacity: 1, scale: 1, duration: 1.5, ease: 'power2.out',
+      scrollTrigger: { trigger: '#mani', start: 'top 75%' }
+    }
+  );
 }
 
-// ── CURSOR ─────────────────────────────────
+// ── CURSOR ──
 const cur = document.getElementById('cur');
 const curR = document.getElementById('cur-r');
-let curX=0, curY=0, rX=0, rY=0;
-document.addEventListener('mousemove', e=>{ curX=e.clientX; curY=e.clientY; });
+let curX = 0, curY = 0, rX = 0, rY = 0;
+document.addEventListener('mousemove', e => { curX = e.clientX; curY = e.clientY; });
 (function animC(){
-  rX += (curX - rX) * 0.15;
-  rY += (curY - rY) * 0.15;
+  rX += (curX - rX) * 0.12;
+  rY += (curY - rY) * 0.12;
   cur.style.left = curX + 'px';
   cur.style.top  = curY + 'px';
   curR.style.left = rX + 'px';
@@ -1139,63 +1284,56 @@ document.addEventListener('mousemove', e=>{ curX=e.clientX; curY=e.clientY; });
   requestAnimationFrame(animC);
 })();
 
-document.querySelectorAll('a, button, .mc, .hw').forEach(el=>{
-  el.addEventListener('mouseenter', ()=>{
-    cur.style.width='24px'; cur.style.height='24px'; cur.style.opacity='0.2';
-    curR.style.width='80px'; curR.style.height='80px';
-    curR.style.borderColor='rgba(255,85,0,.8)';
-    curR.style.borderWidth='2px';
+document.querySelectorAll('a, button, .mc, .hw, .tm').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cur.style.width = '24px'; cur.style.height = '24px'; cur.style.opacity = '0.15';
+    curR.style.width = '80px'; curR.style.height = '80px';
+    curR.style.borderColor = 'rgba(255,85,0,.8)'; curR.style.borderWidth = '2px';
   });
-  el.addEventListener('mouseleave', ()=>{
-    cur.style.width='8px'; cur.style.height='8px'; cur.style.opacity='1';
-    curR.style.width='40px'; curR.style.height='40px';
-    curR.style.borderColor='rgba(255,85,0,.4)';
-    curR.style.borderWidth='1px';
+  el.addEventListener('mouseleave', () => {
+    cur.style.width = '8px'; cur.style.height = '8px'; cur.style.opacity = '1';
+    curR.style.width = '40px'; curR.style.height = '40px';
+    curR.style.borderColor = 'rgba(255,85,0,.4)'; curR.style.borderWidth = '1px';
   });
 });
 
-// ── MAGNETIC ───────────────────────────────
-document.querySelectorAll('.btn-mag, .mc-icon, .hw-ghost').forEach(btn=>{
-  btn.addEventListener('mousemove', e=>{
+// ── MAGNETIC BUTTONS ──
+document.querySelectorAll('.btn-mag, .ncta').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
     const r = btn.getBoundingClientRect();
     const bx = e.clientX - r.left - r.width/2;
     const by = e.clientY - r.top - r.height/2;
-    gsap.to(btn, { x: bx * 0.2, y: by * 0.2, rotateX: -by * 0.1, rotateY: bx * 0.1, duration:0.4 });
-    
-    // Update internal glow
-    const gx = ((e.clientX - r.left) / r.width) * 100;
-    const gy = ((e.clientY - r.top) / r.height) * 100;
-    btn.style.setProperty('--mx', gx+'%');
-    btn.style.setProperty('--my', gy+'%');
+    gsap.to(btn, { x: bx * 0.15, y: by * 0.15, rotateX: -by * 0.08, rotateY: bx * 0.08, duration: 0.4 });
+    btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width) * 100 + '%');
+    btn.style.setProperty('--my', ((e.clientY - r.top) / r.height) * 100 + '%');
   });
-  btn.addEventListener('mouseleave', ()=>{
-    gsap.to(btn, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration:0.8, ease:'elastic.out(1,0.3)' });
+  btn.addEventListener('mouseleave', () => {
+    gsap.to(btn, { x: 0, y: 0, rotateX: 0, rotateY: 0, duration: 0.8, ease: 'elastic.out(1,0.3)' });
   });
 });
 
-// ── NAV SCROLL ─────────────────────────────
-window.addEventListener('scroll', ()=>{
+// ── MODULE SPOTLIGHT GLOW ──
+document.querySelectorAll('.mc').forEach(mc => {
+  mc.addEventListener('mousemove', e => {
+    const r = mc.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    mc.style.backgroundImage = `radial-gradient(circle at ${x}% ${y}%, rgba(255,85,0,.07), transparent 55%)`;
+  });
+  mc.addEventListener('mouseleave', () => { mc.style.backgroundImage = ''; });
+});
+
+// ── NAV SCROLL ──
+window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('solid', window.scrollY > 80);
 });
 
-// ── COUNTERS ───────────────────────────────
-document.querySelectorAll('.cnt').forEach(el => {
-  const tgt = parseInt(el.dataset.t);
-  ScrollTrigger.create({
-    trigger: el,
-    start: 'top 90%',
-    onEnter: () => {
-      gsap.to(el, {
-        innerText: tgt,
-        duration: 2.5,
-        snap: { innerText: 1 },
-        ease: 'expo.out'
-      });
-    }
-  });
+// ── MOBILE MENU ──
+document.getElementById('nmenu-btn')?.addEventListener('click', () => {
+  document.getElementById('nlinks').classList.toggle('open');
 });
 
-// ── CINEMATIC SCROLL (IRONCLAD GAPLESS)
+// ── CINEMATIC SCROLL ──
 const numEl = document.getElementById('cin-num');
 const nums = ['01', '02', '03'];
 const cinTl = gsap.timeline({
@@ -1210,55 +1348,21 @@ const cinTl = gsap.timeline({
 
 const cinPanels = gsap.utils.toArray('.cin-panel');
 cinPanels.forEach((p, i) => {
-  // Direct GSAP state management (No CSS transitions)
   gsap.set(p, { opacity: 0, autoAlpha: 0, y: 40 });
-
   const start = i * 0.33;
   const nextStart = (i + 1) * 0.33;
-
-  // Entrance
   cinTl.to(p, { 
-    opacity: 1, 
-    autoAlpha: 1, 
-    y: 0, 
-    duration: 0.1, 
+    opacity: 1, autoAlpha: 1, y: 0, duration: 0.1, 
     onStart: () => { numEl.textContent = nums[i]; }
-  }, start)
-  
-  // Hold & Exit (Last panel stays longer)
+  }, start);
   const exitDuration = (i === cinPanels.length - 1) ? 0.3 : 0.1;
-  cinTl.to(p, { 
-    opacity: 0, 
-    autoAlpha: 0, 
-    y: -40, 
-    duration: exitDuration 
-  }, nextStart - 0.05);
+  cinTl.to(p, { opacity: 0, autoAlpha: 0, y: -40, duration: exitDuration }, nextStart - 0.05);
 });
 
-// Sync Core Visuals
+// Sync Core with scroll
 cinTl.to(coreGroup.position, { z: -12, duration: 1 }, 0);
 cinTl.to(coreGroup.rotation, { z: Math.PI / 2, duration: 1 }, 0);
-
-// ── MODULE HOVER GLOW ──────────────────────
-document.querySelectorAll('.mc').forEach(mc=>{
-  mc.addEventListener('mousemove', e=>{
-    const r = mc.getBoundingClientRect();
-    const x = ((e.clientX-r.left)/r.width)*100;
-    const y = ((e.clientY-r.top)/r.height)*100;
-    mc.style.backgroundImage = `radial-gradient(circle at ${x}% ${y}%, rgba(255,85,0,.06), transparent 55%)`;
-  });
-  mc.addEventListener('mouseleave', ()=>{ mc.style.backgroundImage=''; });
-});
-
-// ── SECTION STAGGERED REVEALS ──────────────
-gsap.utils.toArray('.tm, .hw, .mc').forEach((el,i)=>{
-  gsap.fromTo(el,
-    { opacity:0, y:30 },
-    { opacity:1, y:0, duration:0.7, ease:'power3.out', delay: (i%4)*0.1,
-      scrollTrigger:{ trigger:el, start:'top 90%', once:true }
-    }
-  );
-});
 </script>
+
 </body>
 </html>
