@@ -1365,20 +1365,36 @@ const cinTl = gsap.timeline({
 
 const cinPanels = gsap.utils.toArray('.cin-panel');
 cinPanels.forEach((p, i) => {
-  gsap.set(p, { opacity: 0, autoAlpha: 0, y: 40 });
+  gsap.set(p, { opacity: 0, autoAlpha: 0, y: 60 });
   const start = i * 0.33;
-  const nextStart = (i + 1) * 0.33;
+  
+  // Transition IN
   cinTl.to(p, { 
-    opacity: 1, autoAlpha: 1, y: 0, duration: 0.1, 
-    onStart: () => { numEl.textContent = nums[i]; }
+    opacity: 1, autoAlpha: 1, y: 0, 
+    duration: 0.2, 
+    ease: 'power2.out',
+    onStart: () => { 
+      numEl.textContent = nums[i];
+      gsap.fromTo(numEl, { y: 15, opacity: 0 }, { y: 0, opacity: 0.15, duration: 0.6, ease: 'power2.out' });
+    }
   }, start);
-  const exitDuration = (i === cinPanels.length - 1) ? 0.3 : 0.1;
-  cinTl.to(p, { opacity: 0, autoAlpha: 0, y: -40, duration: exitDuration }, nextStart - 0.05);
+
+  // Transition OUT (except last)
+  if (i < cinPanels.length - 1) {
+    cinTl.to(p, { 
+      opacity: 0, autoAlpha: 0, y: -60, 
+      duration: 0.2, 
+      ease: 'power2.in' 
+    }, (i + 1) * 0.33 - 0.1); 
+  }
 });
 
+// Update the container height for a tighter feel
+document.getElementById('cin').style.height = '210vh';
+
 // Sync Core with scroll
-cinTl.to(coreGroup.position, { z: -12, duration: 1 }, 0);
-cinTl.to(coreGroup.rotation, { z: Math.PI / 2, duration: 1 }, 0);
+cinTl.to(coreGroup.position, { z: -15, duration: 1, ease: 'none' }, 0);
+cinTl.to(coreGroup.rotation, { z: Math.PI, duration: 1, ease: 'none' }, 0);
 </script>
 
 </body>
