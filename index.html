@@ -64,7 +64,7 @@ html.lenis,html.lenis body{height:auto}
 .glow-track:hover::before{opacity:1}
 
 #cur{position:fixed;width:8px;height:8px;background:var(--bl);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width.2s,height.2s,background.2s,opacity.2s;mix-blend-mode:multiply}
-#cur-r{position:fixed;width:40px;height:40px;border:1px solid rgba(37,99,235,.2);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width.25s,height.25s,border-color.25s}
+#cur-r{position:fixed;width:40px;height:40px;border:1px solid rgba(37,99,235,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width.25s,height.25s,border-color.25s}
 body:not(:hover) #cur,body:not(:hover) #cur-r{opacity:0}
 
 #loader{
@@ -1043,6 +1043,31 @@ scene.add(dirLight);
 
 scene.add(coreGroup);
 
+// ── POST PROCESSING (BLOOM) ──
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const composer = new EffectComposer(renderer);
+const renderPass = new RenderPass(scene, camera);
+composer.addPass(renderPass);
+
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+bloomPass.threshold = 0.2;
+bloomPass.strength = 0.6;
+bloomPass.radius = 0.5;
+composer.addPass(bloomPass);
+
+// ── INTERACTIVITY (RAYCASTING) ──
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let hoveredBlock = null;
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
 let mx = 0.5, my = 0.5, scr = 0;
 document.addEventListener('mousemove', e => {
   mx = e.clientX / window.innerWidth;
@@ -1105,7 +1130,32 @@ function animate(){
   coreGroup.rotation.y = scr * 0.5 + (mx - 0.5) * 0.2;
   coreGroup.position.y = (my - 0.5) * -4;
 
-    renderer.render(scene, camera);
+    // Interactivity logic
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(blocks.children);
+    
+    if (intersects.length > 0) {
+      const obj = intersects[0].object;
+      if (hoveredBlock !== obj) {
+        if (hoveredBlock) {
+          gsap.to(hoveredBlock.position, { y: hoveredBlock.userData.baseY, duration: 0.4 });
+          hoveredBlock.material.emissiveIntensity = 0;
+        }
+        hoveredBlock = obj;
+        gsap.to(hoveredBlock.position, { y: hoveredBlock.userData.baseY + 4, duration: 0.3, ease: 'back.out(2)' });
+        if (hoveredBlock.material.emissive) {
+           hoveredBlock.material.emissive.setHex(0x2563eb);
+           hoveredBlock.material.emissiveIntensity = 2;
+        }
+      }
+    } else if (hoveredBlock) {
+      gsap.to(hoveredBlock.position, { y: hoveredBlock.userData.baseY, duration: 0.4 });
+      hoveredBlock.material.emissiveIntensity = 0;
+      hoveredBlock = null;
+    }
+
+    // renderer.render(scene, camera);
+    composer.render();
   } catch (e) {
     console.error("Three.js Animation Error:", e);
   }
@@ -1120,6 +1170,7 @@ window.addEventListener('resize', () => {
   camera.bottom = -frustumSize / 2;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
 });
 
 // ══════════════════════════════════════════
