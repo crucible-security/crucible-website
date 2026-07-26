@@ -3,33 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Crucible — Open-source AI agent security framework. Stress-test AI agents against prompt injection, goal hijacking, and tool misuse before production.">
-<title>Crucible — Agent Security</title>
+<meta name="description" content="Crucible — the open-source security framework that tests what AI agents do, not just what they say. 153 attack vectors across 11 modules, 8/10 OWASP Agentic risks covered, CI/CD-native. Free and Apache 2.0.">
+<meta name="keywords" content="AI agent security, prompt injection testing, LLM red teaming, OWASP Agentic AI, agent security testing, AI security framework">
+<meta name="author" content="Crucible Security">
+<meta name="theme-color" content="#06070A">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://crucible-security.dev/">
+<title>Crucible — Break Your AI Agents Before Attackers Do</title>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Crucible Security">
+<meta property="og:title" content="Crucible — Break Your AI Agents Before Attackers Do">
+<meta property="og:description" content="The open-source framework that stress-tests AI agents against prompt injection, goal hijacking, and tool misuse — before production. Free, Apache 2.0, CI/CD-native.">
+<meta property="og:url" content="https://crucible-security.dev/">
+<meta property="og:image" content="/og-card.svg">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@CrucibleSec">
+<meta name="twitter:title" content="Crucible — Break Your AI Agents Before Attackers Do">
+<meta name="twitter:description" content="Tests what AI agents do, not just what they say. 153 attack vectors across 11 modules. Free & open source.">
+<meta name="twitter:image" content="/og-card.svg">
+
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Crucible",
+  "applicationCategory": "SecurityApplication",
+  "operatingSystem": "Cross-platform",
+  "description": "Open-source AI agent security testing framework covering 8 of the 10 OWASP Agentic Top 10 risks.",
+  "url": "https://crucible-security.dev/",
+  "license": "https://github.com/crucible-security/crucible/blob/main/LICENSE",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,wght@0,500;1,500;1,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg: #F8FAFC;
-  --s1: #FFFFFF;
-  --s2: #F1F5F9;
-  --or: #1E3A8A; /* Navy blue */
-  --or-glow: rgba(30, 58, 138, 0.15);
-  --or-fade: rgba(30, 58, 138, 0.04);
-  --bl: #2563EB; /* Bright blue */
-  --bl-glow: rgba(37, 99, 235, 0.2);
-  --tx: #020617; /* Off Black */
-  --tx2: #334155;
-  --tx3: #64748B;
-  --bdr: rgba(2, 6, 23, 0.05);
-  --bdr2: rgba(30, 58, 138, 0.1);
-  --bdr-hover: rgba(2, 6, 23, 0.1);
-  --glass: rgba(255, 255, 255, 0.85);
-  --si: #64748B;
-  --si2: #2563EB;
+  --bg: #06070A;
+  --s1: #0E1015;
+  --s2: #14171E;
+  --term-bg: #050609;
+  --or: #5B7FFF; /* Periwinkle secondary accent */
+  --or-glow: rgba(91, 127, 255, 0.18);
+  --or-fade: rgba(91, 127, 255, 0.05);
+  --bl: #3B82F6; /* Primary electric blue */
+  --bl-glow: rgba(59, 130, 246, 0.28);
+  --tx: #F5F7FA; /* Near-white */
+  --tx2: #A6AFC2;
+  --tx3: #6D7690;
+  --bdr: rgba(255, 255, 255, 0.08);
+  --bdr2: rgba(59, 130, 246, 0.22);
+  --bdr-hover: rgba(255, 255, 255, 0.18);
+  --glass: rgba(10, 12, 17, 0.72);
+  --si: #6D7690;
+  --si2: #3B82F6;
   --fd: 'Inter', sans-serif;
   --fh: 'Inter', sans-serif;
   --fm: 'JetBrains Mono', monospace;
-  --shd: 0 10px 40px -10px rgba(2, 6, 23, 0.05);
+  --fs: 'Fraunces', serif;
+  --shd: 0 20px 60px -15px rgba(0, 0, 0, 0.55);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -47,7 +84,7 @@ body{
 body::after{
   content:'';position:fixed;inset:0;z-index:9997;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  background-size:200px 200px;opacity:.2;mix-blend-mode:multiply;
+  background-size:200px 200px;opacity:.25;mix-blend-mode:overlay;
 }
 
 html.lenis,html.lenis body{height:auto}
@@ -63,7 +100,7 @@ html.lenis,html.lenis body{height:auto}
 }
 .glow-track:hover::before{opacity:1}
 
-#cur{position:fixed;width:8px;height:8px;background:var(--bl);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width.2s,height.2s,background.2s,opacity.2s;mix-blend-mode:multiply}
+#cur{position:fixed;width:8px;height:8px;background:var(--bl);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width.2s,height.2s,background.2s,opacity.2s;mix-blend-mode:screen}
 #cur-r{position:fixed;width:40px;height:40px;border:1px solid rgba(37,99,235,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width.25s,height.25s,border-color.25s}
 body:not(:hover) #cur,body:not(:hover) #cur-r{opacity:0}
 
@@ -91,7 +128,7 @@ nav{
   display:flex;align-items:center;justify-content:space-between;
   transition:all.4s var(--ease);
 }
-nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-bottom:1px solid var(--bdr);box-shadow:0 4px 20px rgba(2,6,23,0.05)}
+nav.solid{height:72px;background:rgba(6,7,10,0.75);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-bottom:1px solid var(--bdr);box-shadow:0 4px 30px rgba(0,0,0,0.45)}
 .nlogo{display:flex;align-items:center;gap:12px;text-decoration:none}
 .nlogo-ico{width:36px;height:36px;transition:transform.4s var(--ease)}
 .nlogo:hover .nlogo-ico{transform:rotate(45deg) scale(1.1)}
@@ -125,7 +162,7 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   .nlinks{
     display:none;position:fixed;top:72px;left:0;right:0;
     flex-direction:column;gap:0;
-    background:rgba(255,255,255,.95);backdrop-filter:blur(32px);
+    background:rgba(6,7,10,.85);backdrop-filter:blur(32px);
     border-bottom:1px solid var(--bdr);padding:16px 0;
   }
   .nlinks.open{display:flex}
@@ -157,9 +194,9 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   line-height:.9;letter-spacing:-4px;font-weight:800;
   color:var(--tx);perspective:1000px;
 }
-.h-title .hl{color:var(--bl)}
+.h-title .hl{color:var(--bl);font-family:var(--fs);font-style:italic;font-weight:500;letter-spacing:0}
 .h-title .ol{
-  -webkit-text-stroke:2px rgba(2,6,23,0.4);
+  -webkit-text-stroke:2px rgba(255,255,255,0.35);
   color:transparent;
   transition:all.3s;
 }
@@ -199,7 +236,7 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   text-decoration:none;display:inline-flex;align-items:center;gap:8px;
   transition:all.25s;cursor:pointer;
 }
-.btn-out:hover{border-color:var(--tx);transform:translateY(-2px);box-shadow:0 12px 32px rgba(2,6,23,.05)}
+.btn-out:hover{border-color:var(--tx);transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
 .h-scroll{
   position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:10px;
@@ -239,8 +276,8 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   letter-spacing:-1px;line-height:.95;
   color:var(--tx);
 }
-.s-h .dim{-webkit-text-stroke:2px rgba(2,6,23,0.4);color:transparent}
-.s-h .ac{color:var(--bl)}
+.s-h .dim{-webkit-text-stroke:2px rgba(255,255,255,0.35);color:transparent}
+.s-h .ac{color:var(--bl);font-family:var(--fs);font-style:italic;font-weight:500;letter-spacing:0}
 .s-p{font-size:16px;color:var(--tx2);line-height:1.8;font-weight:400;max-width:540px}
 
 #cin{height:180vh;position:relative;margin-top:0;background:transparent}
@@ -267,7 +304,7 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
 .cin-num{
   position:absolute;right:80px;bottom:40px;
   font-family:var(--fd);font-weight:800;font-size:240px;
-  color:rgba(2,6,23,.015);line-height:1;letter-spacing:-8px;
+  color:rgba(255,255,255,.03);line-height:1;letter-spacing:-8px;
   z-index:1;pointer-events:none;
 }
 
@@ -319,11 +356,11 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   border:1px solid var(--bdr);border-radius:8px;box-shadow:var(--shd);
   transition:box-shadow.4s,transform.3s;
 }
-.hw:hover{box-shadow:0 20px 50px -15px rgba(2,6,23,0.08);transform:translateY(-4px)}
+.hw:hover{box-shadow:0 20px 50px -15px rgba(0,0,0,.45);transform:translateY(-4px)}
 .hw-ghost{
   position:absolute;top:-10px;right:-10px;
   font-family:var(--fd);font-weight:800;font-size:100px;letter-spacing:-4px;
-  color:rgba(2,6,23,.03);line-height:1;pointer-events:none;
+  color:rgba(255,255,255,.04);line-height:1;pointer-events:none;
 }
 .hw-n{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--bl);font-family:var(--fh);margin-bottom:18px}
 .hw-t{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--tx);margin-bottom:12px;line-height:1.3}
@@ -337,9 +374,9 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
 #oss{padding:120px 0;background:transparent}
 .oss-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
 .oss-r{
-  background:var(--tx);border-radius:8px;
+  background:var(--term-bg);border-radius:8px;
   padding:28px;font-family:var(--fm);position:relative;
-  box-shadow:0 20px 60px rgba(2,6,23,0.1);
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
   color:#F8FAFC;
 }
 .oss-r::before{
@@ -372,7 +409,7 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   background:var(--bl);
   transform:scaleX(0);transform-origin:left;transition:transform.5s var(--ease);
 }
-.tm:hover{border-color:var(--bdr2);transform:translateY(-4px);box-shadow:0 20px 50px -15px rgba(2,6,23,0.08)}
+.tm:hover{border-color:var(--bdr2);transform:translateY(-4px);box-shadow:0 20px 50px -15px rgba(0,0,0,.45)}
 .tm:hover::before{transform:scaleX(1)}
 .tm-role{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--bl);font-family:var(--fh);margin-bottom:12px}
 .tm-t{font-family:var(--fh);font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px}
@@ -388,11 +425,11 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
   letter-spacing:-1px;line-height:1.1;
   max-width:1100px;margin:0 auto;color:var(--tx);
 }
-.mani-q .em{color:var(--bl)}
-.mani-q .dm{-webkit-text-stroke:2px rgba(2,6,23,0.4);color:transparent}
+.mani-q .em{color:var(--bl);font-family:var(--fs);font-style:italic;font-weight:500}
+.mani-q .dm{-webkit-text-stroke:2px rgba(255,255,255,0.35);color:transparent}
 .mani-by{margin-top:32px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);font-family:var(--fh)}
 
-#cta{padding:140px 0;position:relative;overflow:hidden;background:transparent !important;color:var(--s1)}
+#cta{padding:140px 0;position:relative;overflow:hidden;background:transparent !important;color:var(--tx)}
 #cta::before{
   content:'';position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
@@ -404,9 +441,9 @@ nav.solid{height:72px;background:rgba(255,255,255,0.98);backdrop-filter:blur(32p
 .cta-c{max-width:760px;margin:0 auto;text-align:center;padding:0 48px;position:relative;z-index:2}
 .cta-h{
   font-family:var(--fd);font-weight:800;font-size:clamp(48px,8vw,100px);
-  letter-spacing:-2px;line-height:.95;color:var(--s1);margin-bottom:24px;
+  letter-spacing:-2px;line-height:.95;color:var(--tx);margin-bottom:24px;
 }
-.cta-h .ac{color:var(--bl)}
+.cta-h .ac{color:var(--bl);font-family:var(--fs);font-style:italic;font-weight:500;letter-spacing:0}
 .cta-p{font-size:16px;color:#9CA3AF;line-height:1.8;font-weight:400;margin-bottom:48px}
 
 footer{
@@ -423,7 +460,7 @@ footer{
 .scroll-line{
   position:absolute;left:50%;transform:translateX(-50%);
   width:1px;top:0;height:100%;pointer-events:none;z-index:0;
-  background:linear-gradient(to bottom,transparent,rgba(2,6,23,.05),transparent);
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.1),transparent);
 }
 
 .rv{opacity:1;transform:translateY(0)}
@@ -436,7 +473,7 @@ footer{
   opacity:.4;animation:scanline 4s linear infinite;pointer-events:none;z-index:10;
 }
 @keyframes scanline{0%{top:0}100%{top:100%}}
-.sim-body{height:480px;background:var(--tx);color:#F8FAFC;padding:32px;font-family:var(--fm);font-size:13px;line-height:1.6;overflow-y:auto;position:relative}
+.sim-body{height:480px;background:var(--term-bg);color:#F8FAFC;padding:32px;font-family:var(--fm);font-size:13px;line-height:1.6;overflow-y:auto;position:relative;border:1px solid var(--bdr)}
 .sim-body .c-p{color:#9CA3AF;}
 .sim-body .c-w{color:#F8FAFC;}
 .sim-body .c-o{color:#3B82F6;}
@@ -471,6 +508,130 @@ footer{
   .inner { padding: 0 16px !important; }
   .sim-body { overflow-x: hidden !important; padding: 20px !important; }
 }
+
+/* ── ACCESSIBILITY ── */
+.skip-link{
+  position:fixed;top:-100px;left:16px;z-index:10001;
+  background:var(--tx);color:var(--s1);padding:12px 20px;border-radius:4px;
+  font-family:var(--fh);font-size:13px;font-weight:600;text-decoration:none;
+  transition:top.2s var(--ease);
+}
+.skip-link:focus{top:16px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+
+/* ── STATS / PROOF BAR ── */
+#stats{padding:80px 0;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);background:transparent}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--bdr);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;box-shadow:var(--shd)}
+.stat{background:var(--s1);padding:36px 28px;text-align:center}
+.stat-n{font-family:var(--fd);font-weight:800;font-size:clamp(32px,4vw,48px);letter-spacing:-1px;color:var(--tx);line-height:1}
+.stat-n .u{color:var(--bl)}
+.stat-l{margin-top:10px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);font-family:var(--fh)}
+@media (max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── COMPARISON TABLE ── */
+#compare{padding:120px 0;background:transparent}
+.cmp-wrap{margin-top:60px;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;box-shadow:var(--shd);background:var(--s1)}
+.cmp{width:100%;border-collapse:collapse;font-family:var(--fh);min-width:640px}
+.cmp th,.cmp td{padding:20px 24px;text-align:left;border-bottom:1px solid var(--bdr);font-size:14px;color:var(--tx2)}
+.cmp thead th{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);background:var(--s2)}
+.cmp thead th.cmp-hl{color:var(--bl)}
+.cmp tbody tr:last-child td{border-bottom:none}
+.cmp tbody th{font-weight:600;color:var(--tx);font-size:14px}
+.cmp td.cmp-hl,.cmp .yes{color:var(--bl);font-weight:700}
+.cmp .no{color:var(--tx3)}
+.cmp-scroll{overflow-x:auto}
+.cmp-col-hl{background:var(--or-fade)}
+
+/* ── PRICING ── */
+#pricing{padding:120px 0;background:transparent;border-top:1px solid var(--bdr)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:60px;align-items:stretch}
+.pc{background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:36px 32px;display:flex;flex-direction:column;box-shadow:var(--shd);transition:all.4s var(--ease);position:relative}
+.pc:hover{transform:translateY(-4px);box-shadow:0 20px 50px -15px rgba(0,0,0,.45)}
+.pc-feat{border-color:var(--bl);box-shadow:0 20px 60px -10px rgba(37,99,235,.15)}
+.pc-badge{position:absolute;top:-13px;right:28px;background:var(--bl);color:#fff;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:100px}
+.pc-t{font-family:var(--fh);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3)}
+.pc-price{font-family:var(--fd);font-weight:800;font-size:44px;letter-spacing:-1px;color:var(--tx);margin-top:14px}
+.pc-price span{font-size:14px;font-weight:500;color:var(--tx3);letter-spacing:0}
+.pc-d{font-size:13.5px;color:var(--tx2);line-height:1.6;margin-top:12px;min-height:40px}
+.pc-list{list-style:none;margin-top:28px;display:flex;flex-direction:column;gap:14px;flex:1}
+.pc-list li{font-size:13.5px;color:var(--tx2);display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.pc-list li::before{content:'';flex-shrink:0;width:16px;height:16px;margin-top:2px;background:var(--bl);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat}
+.pc-cta{margin-top:28px;text-align:center;justify-content:center;width:100%}
+@media (max-width:900px){.price-grid{grid-template-columns:1fr}}
+
+/* ── FAQ ── */
+#faq{padding:120px 0;background:transparent;border-top:1px solid var(--bdr)}
+.faq-list{margin-top:50px;max-width:820px}
+.faq-item{border-bottom:1px solid var(--bdr)}
+.faq-q{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:26px 4px;background:none;border:none;cursor:pointer;text-align:left;
+  font-family:var(--fh);font-size:17px;font-weight:600;color:var(--tx);
+}
+.faq-q:hover{color:var(--bl)}
+.faq-icon{flex-shrink:0;width:20px;height:20px;position:relative}
+.faq-icon::before,.faq-icon::after{content:'';position:absolute;background:var(--tx);top:50%;left:50%;transform:translate(-50%,-50%);transition:transform.3s var(--ease),opacity.3s}
+.faq-icon::before{width:14px;height:2px}
+.faq-icon::after{width:2px;height:14px}
+.faq-item.open .faq-icon::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0}
+.faq-item.open .faq-q{color:var(--bl)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height.4s var(--ease)}
+.faq-a p{padding:0 4px 26px;font-size:14.5px;line-height:1.75;color:var(--tx2);max-width:680px}
+
+/* ── FOOTER EXPANDED ── */
+footer.fx{flex-direction:column;align-items:stretch;padding:80px 48px 32px;gap:0}
+.footer-top{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px;padding-bottom:56px}
+.footer-brand-d{font-size:13.5px;color:var(--tx2);line-height:1.7;margin-top:16px;max-width:280px}
+.footer-col-t{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tx3);margin-bottom:18px}
+.footer-col a{display:block;font-size:13.5px;color:var(--tx2);text-decoration:none;margin-bottom:12px;transition:color.2s}
+.footer-col a:hover{color:var(--bl)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:28px;border-top:1px solid var(--bdr);flex-wrap:wrap;gap:16px}
+@media (max-width:900px){.footer-top{grid-template-columns:1fr 1fr;gap:32px}}
+@media (max-width:600px){.footer-top{grid-template-columns:1fr}footer.fx{padding:60px 24px 28px}}
+
+/* ── SCROLL PROGRESS BAR ── */
+#scroll-progress{
+  position:fixed;top:0;left:0;height:2.5px;width:0%;z-index:10003;
+  background:linear-gradient(90deg,var(--bl),var(--or),var(--bl));
+  background-size:200% 100%;
+  box-shadow:0 0 12px var(--bl-glow),0 0 4px var(--bl);
+  transition:width .08s linear;
+}
+
+/* ── AURORA AMBIENT FIELD (fixed, behind all content) ── */
+.aurora-field{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
+.aurora{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;will-change:transform}
+.a1{width:640px;height:640px;top:-10%;left:-10%;background:radial-gradient(circle,var(--bl),transparent 70%);animation:aur1 19s ease-in-out infinite}
+.a2{width:560px;height:560px;bottom:-15%;right:-5%;background:radial-gradient(circle,var(--or),transparent 70%);animation:aur2 25s ease-in-out infinite}
+.a3{width:480px;height:480px;top:35%;left:55%;background:radial-gradient(circle,#8B5CF6,transparent 70%);opacity:.22;animation:aur3 22s ease-in-out infinite}
+@keyframes aur1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(80px,60px) scale(1.15)}}
+@keyframes aur2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-70px,-50px) scale(1.1)}}
+@keyframes aur3{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-40px,50px) scale(1.1)}66%{transform:translate(50px,-30px) scale(0.95)}}
+@media (max-width:768px){.aurora{filter:blur(60px)}.a1,.a2,.a3{width:320px;height:320px}}
+
+/* ── CURSOR LABEL ── */
+#cur-label{
+  position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:10px;
+  font-family:var(--fh);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--bl);white-space:nowrap;opacity:0;transition:opacity.25s;pointer-events:none;
+}
+#cur-r.has-label #cur-label{opacity:1}
+
+/* ── CARD TILT (JS-driven, perspective set inline) ── */
+.mc, .pc{will-change:transform}
+
+/* ── KINETIC / SCRAMBLE TEXT ── */
+.nlinks a{position:relative}
+.scramble-active{color:var(--bl)!important}
+
+/* ── SVG ICON DRAW-IN ── */
+.mc-icon svg path{stroke-dasharray:100;stroke-dashoffset:100}
+
+/* ── STAT COUNT-UP cursor ── */
+.stat-n{font-variant-numeric:tabular-nums}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -478,8 +639,15 @@ footer{
 </head>
 <body>
 
+<a href="#hero" class="skip-link">Skip to content</a>
+<div id="scroll-progress"></div>
+<div class="aurora-field" aria-hidden="true">
+  <div class="aurora a1"></div>
+  <div class="aurora a2"></div>
+  <div class="aurora a3"></div>
+</div>
 <div id="cur"></div>
-<div id="cur-r"></div>
+<div id="cur-r"><span id="cur-label"></span></div>
 
 <!-- CANVAS -->
 <canvas id="cv"></canvas>
@@ -497,8 +665,8 @@ footer{
     <div class="nlogo-ico">
       <svg viewBox="0 0 28 28" fill="none">
         <path d="M14 2L3 7V14c0 5.8 4.8 11 11 12.5C21.2 25 26 19.8 26 14V7L14 2Z" stroke="#607080" stroke-width="1.2" fill="none"/>
-        <path d="M14 6.5L8 9.5V14c0 4 2.8 7.5 6 8.5 3.2-1 6-4.5 6-8.5V9.5L14 6.5Z" stroke="#ff5500" stroke-width="1" fill="rgba(255,85,0,.07)"/>
-        <path d="M14 11V17M11 14H17" stroke="#ff5500" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M14 6.5L8 9.5V14c0 4 2.8 7.5 6 8.5 3.2-1 6-4.5 6-8.5V9.5L14 6.5Z" stroke="#2563EB" stroke-width="1" fill="rgba(37,99,235,.08)"/>
+        <path d="M14 11V17M11 14H17" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
     </div>
     <div>
@@ -512,8 +680,10 @@ footer{
   <ul class="nlinks" id="nlinks">
     <li><a href="#mods">Modules</a></li>
     <li><a href="#how">How It Works</a></li>
+    <li><a href="#compare">Compare</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
     <li><a href="#team">Team</a></li>
-    <li><a href="#oss">Open Source</a></li>
     <li><a href="https://github.com/crucible-security/crucible" class="ncta">★ Star on GitHub</a></li>
   </ul>
 </nav>
@@ -561,12 +731,12 @@ footer{
       <div class="cin-panel" id="cp1">
         <div class="s-tag">The Attack Surface</div>
         <h2 class="s-h">1000+<br><span class="dim">Known</span><br>Vectors</h2>
-        <p class="s-p">Every AI agent exposes a new attack surface. OWASP published the Agentic Top 10 in December 2025 — the first formal taxonomy of autonomous AI risks. Crucible covers all of them.</p>
+        <p class="s-p">Every AI agent exposes a new attack surface. OWASP published the Agentic Top 10 in December 2025 — the first formal taxonomy of autonomous AI risks. Crucible covers 8 of the 10, with the remaining two in active development.</p>
       </div>
       <div class="cin-panel" id="cp2">
         <div class="s-tag">The Solution</div>
         <h2 class="s-h">Test<br>Before<br><span class="ac">Deploy</span></h2>
-        <p class="s-p">Crucible runs 1,000+ adversarial attack scenarios against your agent in under 60 seconds. Automated, continuous, and integrated into your CI/CD pipeline.</p>
+        <p class="s-p">Crucible runs 90 attack payloads against your agent in under 60 seconds &mdash; 153 across all 11 modules. Automated, continuous, and integrated into your CI/CD pipeline.</p>
       </div>
     </div>
     <div class="cin-num" id="cin-num">01</div>
@@ -579,20 +749,35 @@ footer{
   <div class="inner">
     <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:60px" class="rv">
       <div class="s-tag">What Crucible Tests</div>
-      <h2 class="s-h">Eight Modules.<br><span class="dim">Zero Blind Spots.</span></h2>
-      <p class="s-p" style="margin-top:12px">Every attack surface an AI agent exposes — covered, tested, and scored before you ship.</p>
+      <h2 class="s-h">Eleven Modules.<br><span class="dim">153 Attack Vectors.</span></h2>
+      <p class="s-p" style="margin-top:12px">Every module below is live in v0.18.3 — nothing on this grid is roadmap. Plus a behavioral-drift engine, an MCP trace proxy, RAG-poisoning testing, and a 12-target benchmark suite beyond attack counts.</p>
     </div>
     <div class="mods-grid rv">
-      <div class="mc"><div class="mc-n">01 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div class="mc-t">Reliability Testing</div><div class="mc-d">Runs your agent 10× on identical inputs. Scores variance and detects non-deterministic failure modes.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">02 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="mc-t">OWASP Top 10</div><div class="mc-d">Full coverage of all 10 OWASP Agentic AI risks. Goal hijacking, tool misuse, identity abuse, memory poisoning.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">03 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="mc-t">Hallucination Detection</div><div class="mc-d">Benchmarks responses against ground truth. Scores factual accuracy and identifies hallucination patterns.</div><span class="mc-b bl">Live v0.1</span></div>
-      <div class="mc"><div class="mc-n">04 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div class="mc-t">Goal Completion</div><div class="mc-d">Did the agent actually finish the task? Evaluates outcomes, not just output format or response length.</div><span class="mc-b bc">v0.2</span></div>
-      <div class="mc"><div class="mc-n">05 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div><div class="mc-t">Tool Use Accuracy</div><div class="mc-d">Verifies agents call correct tools with valid parameters. Detects tool abuse and unauthorized API access.</div><span class="mc-b bc">v0.2</span></div>
-      <div class="mc"><div class="mc-n">06 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="mc-t">Multi-Agent Handoffs</div><div class="mc-d">Tests context integrity across agent-to-agent comms. Detects context poisoning in multi-step pipelines.</div><span class="mc-b bc">v0.3</span></div>
-      <div class="mc"><div class="mc-n">07 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="mc-t">Cost Efficiency</div><div class="mc-d">Token usage, latency, cost-per-task scoring. Production readiness report with optimization guidance.</div><span class="mc-b bc">v0.3</span></div>
-      <div class="mc"><div class="mc-n">08 / 08</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><div class="mc-t">CI/CD Integration</div><div class="mc-d">GitHub Actions plugin. Fails your build automatically if agent security score drops below threshold.</div><span class="mc-b bc">v0.4</span></div>
+      <div class="mc"><div class="mc-n">01 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div><div class="mc-t">Prompt Injection</div><div class="mc-d">50 attack payloads targeting direct and indirect prompt injection across every known delivery technique.</div><span class="mc-b bl">Live · LLM01, LLM07</span></div>
+      <div class="mc"><div class="mc-n">02 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div class="mc-t">Goal Hijacking</div><div class="mc-d">20 attacks that redirect an agent's objective mid-task — the core Agentic AI risk #1.</div><span class="mc-b bl">Live · Agentic #1</span></div>
+      <div class="mc"><div class="mc-n">03 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="mc-t">Jailbreaks</div><div class="mc-d">20 payloads probing guardrail and safety-policy bypass techniques.</div><span class="mc-b bl">Live · LLM01, LLM06</span></div>
+      <div class="mc"><div class="mc-n">04 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="mc-t">Toxicity &amp; Content Safety</div><div class="mc-d">20 attacks probing for unsafe, harmful, or policy-violating generated content.</div><span class="mc-b bl">Live · LLM01, LLM06</span></div>
+      <div class="mc"><div class="mc-n">05 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div><div class="mc-t">Hallucination Detection</div><div class="mc-d">15 attacks benchmarking factual accuracy and overreliance against ground truth.</div><span class="mc-b bl">Live · LLM09 / Agentic #9</span></div>
+      <div class="mc"><div class="mc-n">06 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><div class="mc-t">MCP Server Scan</div><div class="mc-d">10 attacks auditing MCP servers for tool poisoning, command injection, and OAuth scope abuse.</div><span class="mc-b bl">Live · MCP-001–005</span></div>
+      <div class="mc"><div class="mc-n">07 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><div class="mc-t">Enterprise Graph</div><div class="mc-d">5 cross-agent trust attacks that probe multi-agent handoffs and delegation chains.</div><span class="mc-b bl">Live · Agentic #2, #4</span></div>
+      <div class="mc"><div class="mc-n">08 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div class="mc-t">Memory Poisoning</div><div class="mc-d">5 attacks targeting persistent state, extendable via the dedicated <code>poison-test</code> RAG lifecycle tool.</div><span class="mc-b bl">Live · Agentic #5</span></div>
+      <div class="mc"><div class="mc-n">09 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div><div class="mc-t">Infrastructure Escalation</div><div class="mc-d">3 attacks probing SSRF and privilege-escalation paths reachable through agent tool use.</div><span class="mc-b bl">Live · LLM06, SSRF</span></div>
+      <div class="mc"><div class="mc-n">10 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></div><div class="mc-t">Advanced Orchestration</div><div class="mc-d">3 attacks targeting multi-step orchestration and planning logic.</div><span class="mc-b bl">Live · Agentic #3</span></div>
+      <div class="mc"><div class="mc-n">11 / 11</div><div class="mc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div><div class="mc-t">MCP Security</div><div class="mc-d">2 attacks covering core Model Context Protocol misuse — the only tool with native MCP coverage.</div><span class="mc-b bl">Live · Agentic #3</span></div>
     </div>
   </div>
+  </div>
+</section>
+
+<!-- STATS / PROOF -->
+<section id="stats" class="sec">
+  <div class="inner">
+    <div class="stats-grid rv">
+      <div class="stat"><div class="stat-n">552<span class="u">+</span></div><div class="stat-l">Passing Tests</div></div>
+      <div class="stat"><div class="stat-n">9<span class="u">/9</span></div><div class="stat-l">CI Platform &amp; Python Combos Green</div></div>
+      <div class="stat"><div class="stat-n"><span class="u">8</span>/10</div><div class="stat-l">OWASP Agentic Risks Covered</div></div>
+      <div class="stat"><div class="stat-n"><span class="u">$</span>0</div><div class="stat-l">Cost To Start Testing</div></div>
+    </div>
   </div>
 </section>
 
@@ -602,7 +787,7 @@ footer{
     <div class="rv" style="display:flex;flex-direction:column;gap:16px;margin-bottom:60px">
       <div class="s-tag">Live Simulation</div>
       <h2 class="s-h">The Crucible<br><span class="ac">In Action.</span></h2>
-      <p class="s-p">Witness a real-time adversarial scan. 1,247 vectors deployed. Zero blind spots remaining.</p>
+      <p class="s-p">Witness a real-time adversarial scan. 90 attack payloads deployed in the default run. Zero blind spots remaining.</p>
     </div>
     
     <div class="sim-container rv glass" style="margin-top:40px;border-radius:12px;overflow:hidden;box-shadow:var(--shd)">
@@ -652,33 +837,66 @@ footer{
         <div class="hw-d">One pip install, zero dependencies hell. Works on Python 3.10+. No Docker, no cloud signup, no API keys to start.</div>
         <div class="hw-code">
           <div class="tl"><span class="c-p">$</span> <span class="c-w">pip install crucible-security</span></div>
-          <div class="tl"><span class="c-g">✓ Installed</span> <span class="c-p">crucible-security 0.1.0</span></div>
+          <div class="tl"><span class="c-g">✓ Installed</span> <span class="c-p">crucible-security 0.18.3</span></div>
         </div>
       </div>
       <div class="hw">
         <div class="hw-ghost">02</div>
         <div class="hw-n">Step 02</div>
         <div class="hw-t">Point at Your Agent</div>
-        <div class="hw-d">Define your agent endpoint and attack scope. Choose modules, set thresholds, configure reporting — or use smart defaults.</div>
+        <div class="hw-d">Point the CLI at your agent's endpoint. Set a fail threshold for CI, or use smart defaults for a local run.</div>
         <div class="hw-code">
-          <div class="tl"><span class="c-p">#</span> <span class="c-p">crucible.yaml</span></div>
-          <div class="tl"><span class="c-b">target</span>: <span class="c-g">https://my-agent.io</span></div>
-          <div class="tl"><span class="c-b">modules</span>: <span class="c-w">[security, reliability]</span></div>
-          <div class="tl"><span class="c-b">threshold</span>: <span class="c-o">80</span></div>
+          <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible init --target https://my-agent.io/api/chat</span></div>
+          <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible scan --target https://my-agent.io/api/chat \</span></div>
+          <div class="tl">&nbsp;&nbsp;<span class="c-b">--fail-on</span> <span class="c-o">CRITICAL</span></div>
         </div>
       </div>
       <div class="hw">
         <div class="hw-ghost">03</div>
         <div class="hw-n">Step 03</div>
         <div class="hw-t">Get Your Score</div>
-        <div class="hw-d">Crucible hammers your agent with 1,000+ adversarial scenarios. You get a detailed report with severity, reproduction steps, and fix suggestions.</div>
+        <div class="hw-d">Crucible runs its attack suite against your agent. You get a graded report (A–F) with severity, OWASP mapping, and reproduction steps.</div>
         <div class="hw-code">
-          <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible scan</span></div>
-          <div class="tl"><span class="c-o">⠸</span> <span class="c-p">Running 1,247 attack vectors...</span></div>
-          <div class="tl"><span class="c-g">COMPLETE</span> — Score: <span class="c-o">74/100</span></div>
+          <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible scan --target URL</span></div>
+          <div class="tl"><span class="c-o">⠸</span> <span class="c-p">Running 90 attack payloads...</span></div>
+          <div class="tl"><span class="c-g">COMPLETE</span> — Grade: <span class="c-o">B</span> (78/100)</div>
           <div class="tl"><span class="c-p">3 critical · 7 medium · 12 low</span></div>
         </div>
+
       </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- COMPARE -->
+<section id="compare" class="sec">
+  <div style="padding:120px 0">
+  <div class="inner">
+    <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:20px" class="rv">
+      <div class="s-tag">Why Crucible</div>
+      <h2 class="s-h">Behavior,<br><span class="dim">Not</span> <span class="ac">Vibes.</span></h2>
+      <p class="s-p" style="margin-top:12px">Most red-teaming tools grade what an agent says. Crucible grades what it does — actual tool calls, actual side effects, actual outcomes.</p>
+    </div>
+    <div class="cmp-wrap rv cmp-scroll">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th>Manual Pentesting</th>
+            <th>Prompt-Only Red-Teaming</th>
+            <th class="cmp-hl">Crucible</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Tests actual tool calls &amp; side effects</th><td class="no">Sometimes</td><td class="no">No</td><td class="cmp-hl yes">Yes</td></tr>
+          <tr><th scope="row">OWASP Agentic Top 10 coverage</th><td class="no">Manual, incomplete</td><td class="no">Partial</td><td class="cmp-hl yes">8 / 10 (2 in progress)</td></tr>
+          <tr><th scope="row">Runs in CI/CD on every commit</th><td class="no">No</td><td class="no">Limited</td><td class="cmp-hl yes">Yes</td></tr>
+          <tr><th scope="row">Time to first result</th><td class="no">Days–weeks</td><td class="no">Hours</td><td class="cmp-hl yes">&lt; 60 seconds</td></tr>
+          <tr><th scope="row">Framework support</th><td class="no">N/A</td><td class="no">Varies</td><td class="cmp-hl yes">LangChain · CrewAI · AutoGen · MCP</td></tr>
+          <tr><th scope="row">Cost to start</th><td class="no">$$$$ per engagement</td><td class="no">$–$$ / seat</td><td class="cmp-hl yes">Free &amp; open source</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
   </div>
@@ -714,7 +932,7 @@ footer{
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
             Star on GitHub
           </a>
-          <a href="#" class="btn-out">Read Docs →</a>
+          <a href="https://crucible-security.github.io/crucible" class="btn-out">Read Docs →</a>
         </div>
       </div>
       <div class="oss-r">
@@ -723,11 +941,11 @@ footer{
           <div class="t-title">crucible — terminal</div>
         </div>
         <div class="tl"><span class="c-p">$</span> <span class="c-w">pip install crucible-security</span></div>
-        <div class="tl"><span class="c-g">✓ Installed crucible-security 0.1.0</span></div>
+        <div class="tl"><span class="c-g">✓ Installed crucible-security 0.18.3</span></div>
         <div class="tl">&nbsp;</div>
         <div class="tl"><span class="c-p">$</span> <span class="c-w">crucible scan --target https://my-agent.com</span></div>
         <div class="tl"><span class="c-o">⠸</span> <span class="c-p">Loading attack modules...</span></div>
-        <div class="tl"><span class="c-g">✓</span> <span class="c-p">Security: 1,247 vectors loaded</span></div>
+        <div class="tl"><span class="c-g">✓</span> <span class="c-p">Security: 90 attacks loaded</span></div>
         <div class="tl"><span class="c-g">✓</span> <span class="c-p">Reliability module ready</span></div>
         <div class="tl"><span class="c-g">✓</span> <span class="c-p">Hallucination module ready</span></div>
         <div class="tl"><span class="c-o">⠸</span> <span class="c-p">Running adversarial scan...</span></div>
@@ -763,6 +981,94 @@ footer{
   </div>
 </section>
 
+<!-- PRICING -->
+<section id="pricing" class="sec">
+  <div class="inner">
+    <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:20px" class="rv">
+      <div class="s-tag">Open Core</div>
+      <h2 class="s-h">Free at the Core.<br><span class="dim">Scaled for Teams.</span></h2>
+      <p class="s-p" style="margin-top:12px">The engine is Apache 2.0, forever. Paid tiers add the things a team needs on top of it — never gates on the security modules themselves.</p>
+    </div>
+    <div class="price-grid">
+      <div class="pc rv">
+        <div class="pc-t">Community</div>
+        <div class="pc-price">$0</div>
+        <div class="pc-d">For individual builders and open-source projects.</div>
+        <ul class="pc-list">
+          <li>Full CLI &amp; all 8 test modules</li>
+          <li>153 attack vectors across 11 modules</li>
+          <li>8 of 10 OWASP Agentic risks covered</li>
+          <li>Local &amp; CI reports (JSON/HTML)</li>
+          <li>Community Discord support</li>
+        </ul>
+        <a href="https://github.com/crucible-security/crucible" class="btn-out pc-cta">Get Started →</a>
+      </div>
+      <div class="pc pc-feat rv">
+        <div class="pc-badge">Most Popular</div>
+        <div class="pc-t">Team</div>
+        <div class="pc-price">Early Access</div>
+        <div class="pc-d">For teams shipping agents to production.</div>
+        <ul class="pc-list">
+          <li>Everything in Community</li>
+          <li><code class="hw-code" style="display:inline;padding:2px 6px;font-size:12px">crucible watch</code> drift monitoring &amp; Slack alerts</li>
+          <li>Regression tracking across releases</li>
+          <li>Hosted dashboards &amp; historical trends</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="https://github.com/crucible-security/crucible" class="btn-mag pc-cta">Join Waitlist →</a>
+      </div>
+      <div class="pc rv">
+        <div class="pc-t">Enterprise</div>
+        <div class="pc-price">Custom</div>
+        <div class="pc-d">For orgs with compliance &amp; scale requirements.</div>
+        <ul class="pc-list">
+          <li>Everything in Team</li>
+          <li>SSO, audit logs, on-prem / VPC deploy</li>
+          <li>Custom attack modules &amp; SLAs</li>
+          <li>Dedicated security engineering support</li>
+        </ul>
+        <a href="https://github.com/crucible-security/crucible" class="btn-out pc-cta">Talk to Us →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="sec">
+  <div class="inner">
+    <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:20px" class="rv">
+      <div class="s-tag">Questions</div>
+      <h2 class="s-h">Frequently<br><span class="ac">Asked.</span></h2>
+    </div>
+    <div class="faq-list rv">
+      <div class="faq-item open">
+        <button class="faq-q" aria-expanded="true">Is Crucible really free?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>Yes. The core engine and all 8 test modules are Apache 2.0 and always will be. No feature-gating the security tests themselves — paid tiers add hosted dashboards, drift monitoring, and enterprise deployment, not testing coverage.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Which agent frameworks does it support?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>LangChain, CrewAI, AutoGen, and raw MCP endpoints out of the box. If your agent exposes an HTTP or MCP interface, Crucible can point at it.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">How is this different from prompt-only red-teaming tools?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>Most tools grade the text an agent generates. Crucible executes the agent's actual tool calls and side effects — the only way to catch goal hijacking, tool misuse, and multi-agent contagion that never shows up in the response text.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Do I need an API key or cloud account to start?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>No. <code>pip install crucible-security</code> and you're scanning locally in under a minute. No signup, no telemetry by default.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">Can Crucible fail my CI build?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>Yes — the GitHub Actions integration fails the build automatically if your agent's security score drops below a threshold you set, so regressions never reach production.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">How can I contribute?<span class="faq-icon"></span></button>
+        <div class="faq-a"><p>Open a PR on GitHub. We recruit through contribution — if your work stands out, we reach out about joining the core team.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section id="cta" class="sec">
   <div class="cta-c rv">
@@ -774,22 +1080,47 @@ footer{
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02.005 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.82 1.1.82 2.22v3.29c0 .32.21.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
         Star on GitHub — It's Free
       </a>
-      <a href="#" class="btn-out">Read Docs →</a>
+      <a href="https://crucible-security.github.io/crucible" class="btn-out">Read Docs →</a>
     </div>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer>
-  <div class="fl">CRUCIBLE</div>
-  <ul class="flinks">
-    <li><a href="https://github.com/crucible-security/crucible">GitHub</a></li>
-    <li><a href="https://github.com/crucible-security/crucible#documentation">Docs</a></li>
-    <li><a href="https://discord.gg/m7wAxEv3">Discord</a></li>
-    <li><a href="https://x.com/CrucibleSec">Twitter / X</a></li>
-    <li><a href="https://github.com/crucible-security/crucible/blob/main/LICENSE">Apache 2.0</a></li>
-  </ul>
-  <div class="fr">© 2026 Crucible Security · Open Source</div>
+<footer class="fx">
+  <div class="footer-top">
+    <div>
+      <div class="fl">CRUCIBLE</div>
+      <p class="footer-brand-d">The open-source framework that tests what AI agents do, not just what they say. Apache 2.0, forever.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-t">Product</div>
+      <a href="#mods">Modules</a>
+      <a href="#how">How It Works</a>
+      <a href="#compare">Compare</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-t">Resources</div>
+      <a href="https://github.com/crucible-security/crucible#documentation">Documentation</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/crucible-security/crucible/blob/main/LICENSE">Apache 2.0 License</a>
+      <a href="https://github.com/crucible-security/crucible">Changelog</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-t">Community</div>
+      <a href="https://github.com/crucible-security/crucible">GitHub</a>
+      <a href="https://discord.gg/m7wAxEv3">Discord</a>
+      <a href="https://x.com/CrucibleSec">Twitter / X</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="fr">© 2026 Crucible Security · Open Source · Apache 2.0</div>
+    <ul class="flinks">
+      <li><a href="https://github.com/crucible-security/crucible">GitHub</a></li>
+      <li><a href="https://discord.gg/m7wAxEv3">Discord</a></li>
+      <li><a href="https://x.com/CrucibleSec">Twitter / X</a></li>
+    </ul>
+  </div>
 </footer>
 
 
@@ -813,6 +1144,12 @@ const lenis = new Lenis({
 });
 
 lenis.on('scroll', ScrollTrigger.update);
+lenis.on('scroll', (e) => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = max > 0 ? Math.min(100, (e.scroll / max) * 100) : 0;
+  const bar = document.getElementById('scroll-progress');
+  if (bar) bar.style.width = pct + '%';
+});
 gsap.ticker.add((time) => { lenis.raf(time * 1000); });
 gsap.ticker.lagSmoothing(0);
 
@@ -851,7 +1188,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.setClearColor(0x000000, 0);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xF8FAFC, 0.015);
+scene.fog = new THREE.FogExp2(0x06070A, 0.015);
 scene.background = null;
 
 // ── ORTHOGRAPHIC CAMERA (ISOMETRIC) ──
@@ -1003,12 +1340,12 @@ for(let i=0; i<12; i++){
   const canvas = document.createElement('canvas');
   canvas.width = 120; canvas.height = 40;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = 'rgba(2, 6, 23, 0.05)';
+  ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
   ctx.fillRect(0,0,120,40);
-  ctx.strokeStyle = '#020617';
+  ctx.strokeStyle = '#3B82F6';
   ctx.lineWidth = 4;
   ctx.strokeRect(0,0,120,40);
-  ctx.fillStyle = '#020617';
+  ctx.fillStyle = '#F5F7FA';
   ctx.font = 'bold 18px Inter, sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(labelTexts[i % labelTexts.length], 60, 26);
@@ -1320,13 +1657,80 @@ function initAnims(){
   });
 
   // Staggered Item Reveals
-  gsap.utils.toArray('.mc, .hw, .tm').forEach(el => {
+  gsap.utils.toArray('.mc, .hw, .tm, .stat, .pc').forEach(el => {
     gsap.fromTo(el, 
       { opacity: 0, y: 40, scale: 0.97 },
       { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 90%' }
       }
     );
+  });
+
+  // FAQ items — staggered slide-in
+  gsap.utils.toArray('.faq-item').forEach((el, i) => {
+    gsap.fromTo(el,
+      { opacity: 0, x: -24 },
+      { opacity: 1, x: 0, duration: 0.7, ease: 'power3.out', delay: i * 0.05,
+        scrollTrigger: { trigger: el, start: 'top 92%' }
+      }
+    );
+  });
+
+  // Comparison table rows — staggered reveal
+  gsap.utils.toArray('.cmp tbody tr').forEach((el, i) => {
+    gsap.fromTo(el,
+      { opacity: 0, x: -16 },
+      { opacity: 1, x: 0, duration: 0.6, ease: 'power2.out', delay: i * 0.06,
+        scrollTrigger: { trigger: '.cmp-wrap', start: 'top 85%' }
+      }
+    );
+  });
+  gsap.fromTo('.cmp-wrap', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: '.cmp-wrap', start: 'top 88%' } });
+
+  // Footer columns — staggered reveal
+  gsap.utils.toArray('.footer-top > div').forEach((el, i) => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out', delay: i * 0.08,
+        scrollTrigger: { trigger: '.footer-top', start: 'top 95%' }
+      }
+    );
+  });
+
+  // Stat count-up numbers
+  document.querySelectorAll('.stat-n').forEach(el => {
+    const txt = el.textContent.trim();
+    const m = txt.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return;
+    const target = parseFloat(m[1]);
+    const before = txt.slice(0, m.index);
+    const after = txt.slice(m.index + m[0].length);
+    const counter = { v: 0 };
+    ScrollTrigger.create({
+      trigger: el, start: 'top 90%', once: true,
+      onEnter: () => {
+        gsap.to(counter, {
+          v: target, duration: 1.6, ease: 'power2.out',
+          onUpdate: () => {
+            const isInt = Number.isInteger(target);
+            el.textContent = before + (isInt ? Math.round(counter.v) : counter.v.toFixed(1)) + after;
+          }
+        });
+      }
+    });
+  });
+
+  // Module icon draw-in (stroke-dasharray reveal)
+  document.querySelectorAll('.mc-icon svg path').forEach(path => {
+    try {
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      gsap.to(path, {
+        strokeDashoffset: 0, duration: 1.1, ease: 'power2.out',
+        scrollTrigger: { trigger: path.closest('.mc'), start: 'top 88%' }
+      });
+    } catch(e) {}
   });
   
   // Manifesto parallax
@@ -1341,6 +1745,7 @@ function initAnims(){
 // ── CURSOR ──
 const cur = document.getElementById('cur');
 const curR = document.getElementById('cur-r');
+const auroraField = document.querySelector('.aurora-field');
 let curX = 0, curY = 0, rX = 0, rY = 0;
 document.addEventListener('mousemove', e => { curX = e.clientX; curY = e.clientY; });
 (function animC(){
@@ -1350,6 +1755,11 @@ document.addEventListener('mousemove', e => { curX = e.clientX; curY = e.clientY
   cur.style.top  = curY + 'px';
   curR.style.left = rX + 'px';
   curR.style.top  = rY + 'px';
+  if (auroraField) {
+    const px = (curX / window.innerWidth - 0.5) * 24;
+    const py = (curY / window.innerHeight - 0.5) * 24;
+    auroraField.style.transform = `translate(${px}px, ${py}px)`;
+  }
   requestAnimationFrame(animC);
 })();
 
@@ -1357,12 +1767,32 @@ document.querySelectorAll('a, button, .mc, .hw, .tm').forEach(el => {
   el.addEventListener('mouseenter', () => {
     cur.style.width = '24px'; cur.style.height = '24px'; cur.style.opacity = '0.15';
     curR.style.width = '80px'; curR.style.height = '80px';
-    curR.style.borderColor = 'rgba(255,85,0,.8)'; curR.style.borderWidth = '2px';
+    curR.style.borderColor = 'rgba(37,99,235,.8)'; curR.style.borderWidth = '2px';
   });
   el.addEventListener('mouseleave', () => {
     cur.style.width = '8px'; cur.style.height = '8px'; cur.style.opacity = '1';
     curR.style.width = '40px'; curR.style.height = '40px';
-    curR.style.borderColor = 'rgba(255,85,0,.4)'; curR.style.borderWidth = '1px';
+    curR.style.borderColor = 'rgba(37,99,235,.4)'; curR.style.borderWidth = '1px';
+  });
+});
+
+// ── CURSOR CONTEXTUAL LABELS ──
+const curLabel = document.getElementById('cur-label');
+const labelMap = [
+  { sel: '.mc', text: 'VIEW MODULE' },
+  { sel: '.pc', text: 'SELECT PLAN' },
+  { sel: '.tm', text: 'TEAM' },
+  { sel: '.btn-mag', text: 'GO' },
+  { sel: '.faq-q', text: 'TOGGLE' },
+];
+labelMap.forEach(({ sel, text }) => {
+  document.querySelectorAll(sel).forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      if (curLabel) { curLabel.textContent = text; curR.classList.add('has-label'); }
+    });
+    el.addEventListener('mouseleave', () => {
+      curR.classList.remove('has-label');
+    });
   });
 });
 
@@ -1381,15 +1811,61 @@ document.querySelectorAll('.btn-mag, .ncta').forEach(btn => {
   });
 });
 
-// ── MODULE SPOTLIGHT GLOW ──
+// ── MODULE SPOTLIGHT GLOW + TILT ──
 document.querySelectorAll('.mc').forEach(mc => {
   mc.addEventListener('mousemove', e => {
     const r = mc.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width) * 100;
     const y = ((e.clientY - r.top) / r.height) * 100;
-    mc.style.backgroundImage = `radial-gradient(circle at ${x}% ${y}%, rgba(255,85,0,.07), transparent 55%)`;
+    mc.style.backgroundImage = `radial-gradient(circle at ${x}% ${y}%, rgba(37,99,235,.07), transparent 55%)`;
+    const rx = ((y / 100) - 0.5) * -6;
+    const ry = ((x / 100) - 0.5) * 6;
+    gsap.to(mc, { rotateX: rx, rotateY: ry, duration: 0.5, ease: 'power2.out', transformPerspective: 800 });
   });
-  mc.addEventListener('mouseleave', () => { mc.style.backgroundImage = ''; });
+  mc.addEventListener('mouseleave', () => {
+    mc.style.backgroundImage = '';
+    gsap.to(mc, { rotateX: 0, rotateY: 0, duration: 0.7, ease: 'elastic.out(1,0.4)' });
+  });
+});
+
+// ── PRICING CARD TILT ──
+document.querySelectorAll('.pc').forEach(pc => {
+  pc.addEventListener('mousemove', e => {
+    const r = pc.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * 100;
+    const y = ((e.clientY - r.top) / r.height) * 100;
+    const rx = ((y / 100) - 0.5) * -4;
+    const ry = ((x / 100) - 0.5) * 4;
+    gsap.to(pc, { rotateX: rx, rotateY: ry, duration: 0.5, ease: 'power2.out', transformPerspective: 1000 });
+  });
+  pc.addEventListener('mouseleave', () => {
+    gsap.to(pc, { rotateX: 0, rotateY: 0, duration: 0.7, ease: 'elastic.out(1,0.4)' });
+  });
+});
+
+// ── NAV LINK SCRAMBLE TEXT (kinetic hover) ──
+const SCRAMBLE_CHARS = '!<>-_\\/[]{}—=+*^?#________';
+document.querySelectorAll('.nlinks a:not(.ncta)').forEach(a => {
+  const original = a.textContent;
+  let frame = null;
+  a.addEventListener('mouseenter', () => {
+    let iteration = 0;
+    a.classList.add('scramble-active');
+    clearInterval(frame);
+    frame = setInterval(() => {
+      a.textContent = original.split('').map((ch, i) => {
+        if (ch === ' ') return ' ';
+        if (i < iteration) return original[i];
+        return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+      }).join('');
+      iteration += original.length / 8;
+      if (iteration >= original.length) {
+        a.textContent = original;
+        a.classList.remove('scramble-active');
+        clearInterval(frame);
+      }
+    }, 30);
+  });
 });
 
 // ── NAV SCROLL (Handled by safe script below) ──
@@ -1409,6 +1885,30 @@ window.addEventListener('scroll', () => {
   if (nmenu && nlinks) {
     nmenu.onclick = () => nlinks.classList.toggle('open');
   }
+})();
+
+// ── FAQ ACCORDION ──
+(function initFAQ(){
+  const items = document.querySelectorAll('.faq-item');
+  function setState(item, open){
+    const btn = item.querySelector('.faq-q');
+    const panel = item.querySelector('.faq-a');
+    item.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.style.maxHeight = open ? panel.scrollHeight + 'px' : '0px';
+  }
+  items.forEach(item => {
+    const btn = item.querySelector('.faq-q');
+    setState(item, item.classList.contains('open'));
+    btn.addEventListener('click', () => {
+      const willOpen = !item.classList.contains('open');
+      items.forEach(i => setState(i, false));
+      setState(item, willOpen);
+    });
+  });
+  window.addEventListener('resize', () => {
+    items.forEach(i => { if (i.classList.contains('open')) setState(i, true); });
+  });
 })();
 </script>
 

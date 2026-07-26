@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#06070A"/>
+      <stop offset="1" stop-color="#0E1015"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.8" cy="0.15" r="0.9">
+      <stop offset="0" stop-color="#2563EB" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1E293B" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.4"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- shield mark -->
+  <g transform="translate(96,96)">
+    <path d="M52 8L11 26V52c0 21.6 17.8 41 41 46.5C126 93 116 73.6 116 52V26L52 8Z" fill="#0E1015" stroke="#1E3A8A" stroke-width="1.5"/>
+    <path d="M52 24L29 34.5V52c0 15 10.4 27.9 22.3 31.6C63.6 79.9 74 67 74 52V34.5L52 24Z" fill="#2563EB" fill-opacity="0.85"/>
+    <path d="M52 40V64M40 52H64" stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round"/>
+  </g>
+
+  <text x="96" y="270" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="26" letter-spacing="4" fill="#2563EB">OPEN SOURCE · AGENT SECURITY</text>
+  <text x="93" y="360" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="88" letter-spacing="-2" fill="#F8FAFC">Break your agents</text>
+  <text x="93" y="440" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="88" letter-spacing="-2" fill="#F8FAFC">before attackers do.</text>
+  <text x="96" y="500" font-family="Arial, Helvetica, sans-serif" font-weight="400" font-size="26" fill="#94A3B8">1,000+ adversarial scenarios · OWASP Agentic Top 10 · Free &amp; Apache 2.0</text>
+
+  <text x="96" y="570" font-family="'Courier New', monospace" font-weight="700" font-size="24" fill="#64748B">github.com/crucible-security/crucible</text>
+</svg>
